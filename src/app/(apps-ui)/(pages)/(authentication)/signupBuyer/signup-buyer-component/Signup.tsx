@@ -116,8 +116,27 @@ export const MultiStepForm = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const nextStep = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const nextStep = (e: React.MouseEvent) => {
     e.preventDefault();
+    if (step === 1 && formData.password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+    if (step === 1 && formData.username.length < 3) {
+      setError("Username must be at least 3 characters long.");
+      return;
+    }
+    if (step === 1 && formData.username.length > 16) {
+      setError("Username must be at most 16 characters long.");
+      return;
+    }
+    if (step === 3) {
+      const isValidMobileNo = /^09\d{9}$/.test(formData.mobileNo);
+      if (!isValidMobileNo) {
+        setError("Mobile number must start with '09' and be followed by 9 digits.");
+        return;
+      }
+    }
     if (isStepValid()) {
       setStep((prev) => Math.min(prev + 1, 5));
       setError("");
@@ -134,11 +153,32 @@ export const MultiStepForm = () => {
   const isStepValid = () => {
     switch (step) {
       case 1:
-        return formData.username && formData.email && formData.password;
+        return (
+          formData.username.length >= 3 && // Minimum length of 3
+          formData.username.length <= 16 && // Maximum length of 16
+          formData.email &&
+          formData.password &&
+          formData.password.length >= 8 // Add this line for password length validation
+        );
       case 2:
-        return formData.name && formData.bday && formData.gender;
+        const selectedDate = new Date(formData.bday);
+        const minDate = new Date("1950-01-01");
+        const maxDate = new Date(getMaxDate());
+        return (
+          formData.name &&
+          formData.bday &&
+          formData.gender &&
+          selectedDate >= minDate &&
+          selectedDate <= maxDate // Ensure date is within the valid range
+        );
       case 3:
-        return formData.address && formData.mobileNo && formData.bio;
+        const isValidMobileNo = /^09\d{9}$/.test(formData.mobileNo); // Validate mobile number
+        return (
+          formData.address &&
+          formData.mobileNo &&
+          isValidMobileNo && // Mobile number must start with "09" and have 9 additional digits
+          formData.bio
+        );
       case 4:
         return true; // Portfolio link is optional
       case 5:
@@ -179,7 +219,7 @@ export const MultiStepForm = () => {
       // Handle the "email already exists" error
       if ((err as Error).message.includes("Email already exists")) {
         setError("Email already exists. Please use a different email.");
-      } else if ((err as Error).message.includes("Username already exists")){
+      } else if ((err as Error).message.includes("Username already exists")) {
         setError("Username already exists. Please use a different username.");
       } else {
         setError("An error occurred during signup. Please try again.");
@@ -206,6 +246,7 @@ export const MultiStepForm = () => {
     setStep(1);
   };
 
+
   const renderStepContent = () => {
     switch (step) {
       case 1:
@@ -215,7 +256,7 @@ export const MultiStepForm = () => {
       case 3:
         return <Step3 formData={formData} handleChange={handleChange} />;
       case 4:
-          return <Step4 formData={formData} handleChange={handleChange} />;
+        return <Step4 formData={formData} handleChange={handleChange} />;
       case 5:
         return <Step5 formData={formData} handleSubmit={handleSubmit} prevStep={prevStep} handleCancel={handleCancel} />;
       default:
@@ -285,8 +326,14 @@ export const MultiStepForm = () => {
     </form>
   );
 };
+const getMaxDate = () => {
+  const currentYear = new Date().getFullYear();
+  const maxYear = currentYear - 4; // Current year minus 4
+  return `${maxYear}-12-31`; // December 31st of the calculated year
+};
 
 export const Input: React.FC<InputProps> = ({ name, value, onChange, placeholder, icon, type = "text" }) => (
+
   <div className="w-full relative">
     <input
       className="w-full h-12 border-b border-b-palette-1 p-4 pl-12 bg-transparent placeholder-palette-7/20 focus:border-palette-1 transition-colors outline-none ring-0"
@@ -296,6 +343,8 @@ export const Input: React.FC<InputProps> = ({ name, value, onChange, placeholder
       onChange={onChange}
       placeholder={placeholder}
       required
+      min={type === "date" ? "1950-01-01" : undefined} // Set minimum date to January 1, 1950
+      max={type === "date" ? getMaxDate() : undefined} // Dynamically calculate the maximum date
     />
     <Icon
       className="text-palette-1 absolute top-1/2 left-0 -translate-y-1/2"
