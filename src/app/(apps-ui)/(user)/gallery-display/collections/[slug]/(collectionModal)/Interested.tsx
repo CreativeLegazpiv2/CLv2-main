@@ -186,7 +186,7 @@ export const Interested = ({
 
   useEffect(() => {
     if (!selectedSessionId) return;
-  
+
     const subscription = supabase
       .channel("getMsg")
       .on(
@@ -203,12 +203,12 @@ export const Interested = ({
         }
       )
       .subscribe();
-  
+
     return () => {
       supabase.removeChannel(subscription);
     };
   }, [selectedSessionId]); // Depend on selectedSessionId
-  
+
 
   useEffect(() => {
     getSessionToken();
@@ -350,6 +350,8 @@ export const Interested = ({
     checkAndAutoSend();
   }, [autoSendTriggered, chat, formData.childid, previewImage]);
 
+
+
   const fetchMessages = async () => {
     const token = getSession();
     if (!token) return;
@@ -379,7 +381,10 @@ export const Interested = ({
         if (data && data.sessions && data.sessions.length > 0) {
           // Instead of using flatMap, just use the data directly
           setMessages(data.sessions); // This assumes 'sessions' contains all the message data you need
+  
+          
           setMsgLoading(false);
+
         } else {
           setMsgLoading(false);
         }
@@ -388,13 +393,12 @@ export const Interested = ({
       }
     } else {
       try {
-        const getses = selectedSessionId as string;
-
+        console.log ("selectedSessionId:", selectedSessionId);
         const response = await fetch("/api/chat/all-msg-session", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            sender_a: getses, // Use the user ID from the token
+            sender_a: selectedSessionId as string, // Use the user ID from the token
           },
         });
 
@@ -404,9 +408,12 @@ export const Interested = ({
 
         const data = await response.json();
         if (data && data.length > 0) {
+          console.log("Sessions:", data.sessions);
           setMessages(data.message);
+          console.log("message:", data.message);
           setMsgLoading(false);
         } else {
+          console.log("message:", data.message);
           setMsgLoading(false);
         }
       } catch (error: any) {
@@ -464,82 +471,47 @@ export const Interested = ({
   };
 
   const handleSendMessage = async () => {
-    if (isSending) return;  // Prevent multiple sends if already sending
+    if (isSending) return; // Prevent multiple sends if already sending
     const token = getSession();
     if (!token) return;
-
+  
     if (!message.trim()) return; // Prevent sending empty messages
-
-    setIsSending(true);  // Set loading to true before sending
-
-    if (!isChat) {
-      try {
-        const { payload } = await jwtVerify(
-          token,
-          new TextEncoder().encode(JWT_SECRET)
-        );
-        const userIdFromToken = payload.id as string;
-
-        const response = await fetch("/api/chat/msg-session", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            sender_a: userIdFromToken, // Use the user ID from the token
-            sender_b: formData.childid, // Use the child ID from formData
-            message,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to send message");
-        }
-
-        const data = await response.json();
-        console.log("Message sent successfully", data);
-        setMessage(""); // Clear the message input
-        fetchMessages(); // Fetch messages again to update the chat
-      } catch (error: any) {
-        console.log("Error sending message:", error.message);
-      } finally {
-        setIsSending(false);  // Reset loading state after sending
+  
+    setIsSending(true); // Set loading to true before sending
+  
+    try {
+      const { payload } = await jwtVerify(token, new TextEncoder().encode(JWT_SECRET));
+      const userIdFromToken = payload.id as string;
+  
+      const requestBody = {
+        sender_a: userIdFromToken,
+        sender_b: isChat ? selectedId : formData.childid, // Determine recipient ID
+        message,
+      };
+  
+      const response = await fetch("/api/chat/msg-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to send message");
       }
-    } else {
-      try {
-        const { payload } = await jwtVerify(
-          token,
-          new TextEncoder().encode(JWT_SECRET)
-        );
-        const userIdFromToken = payload.id as string;
-
-        const response = await fetch("/api/chat/msg-session", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            sender_a: userIdFromToken, // Use the user ID from the token
-            sender_b: selectedId, // Use the selected ID for ongoing chat
-            message,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to send message");
-        }
-
-        const data = await response.json();
-        console.log("Message sent successfully", data);
-        setMessage(""); // Clear the message input
-        fetchMessages(); // Fetch messages again to update the chat
-      } catch (error: any) {
-        console.log("Error sending message:", error.message);
-      } finally {
-        setIsSending(false);  // Reset loading state after sending
-      }
+  
+      const data = await response.json();
+      console.log("Message sent successfully", data);
+      setMessage(""); // Clear the message input
+  
+      // After sending, re-check if a session exists and update chat view
+      setTimeout(() => handleClickNewChat(requestBody.sender_b as string), 500);
+    } catch (error: any) {
+      console.log("Error sending message:", error.message);
+    } finally {
+      setIsSending(false); // Reset loading state after sending
     }
   };
+  
 
 
 
@@ -547,15 +519,25 @@ export const Interested = ({
     setChat(true);
     setSelectedSessionId(null);
     setIsRightColumnVisible(false);
-
+    setMessages([]);
+    setselectedId(null);
+    setUserDetails([]); // 🌟 Reset user details to prevent showing old user
+    setMessage("");
+  
     setIsLoading(true);  // Start loading
-
-    // Simulate a 1-second loading delay
+  
+    // Simulate a 1.5-second loading delay
     setTimeout(() => {
-      setIsLoading(false);  // Stop loading after 1 second
+      setIsLoading(false);  // Stop loading after 1.5 seconds
       fetchSessionData();
-    }, 1000);
+    }, 1500);
   };
+  
+
+  const closeSearch = () => {
+    setSearchQuery('')
+    setShowModal(false)
+  }
 
 
   const modalVariants = {
@@ -681,39 +663,60 @@ export const Interested = ({
     }
   };
 
-
-
   const handleClickNewChat = async (id: string) => {
-    setMsgLoading(true);
-    console.log("clicked id:", id);
-    const token = getSession();
+    setMsgLoading(true)
+    console.log('clicked id:', id)
+    const token = getSession()
+
     if (!token) {
-      console.log("No session token found");
-      return;
+      console.log('No session token found')
+      return
     }
-    setIsRightColumnVisible(true);
+
+    setIsRightColumnVisible(true)
 
     try {
-      const { payload } = await jwtVerify(
-        token,
-        new TextEncoder().encode(JWT_SECRET)
-      );
-      const userIdFromToken = payload.id as string;
-
-      // Set the selected user but do not create a session yet
-      setselectedId(id);
-      setSelectedSessionId(null);
+      const { payload } = await jwtVerify(token, new TextEncoder().encode(JWT_SECRET))
+      const userIdFromToken = payload.id as string
 
       // Fetch user details & check for existing chat session
-      await handleClick(id, userIdFromToken, id);
+      const response = await fetch(`/api/chat/senderMessage`, {
+        method: 'GET',
+        headers: {
+          userIdFromToken: userIdFromToken,
+          id: id,
+        },
+      })
 
+      // Ensure response is JSON before parsing
+      const text = await response.text()
+      let data
+      try {
+        data = JSON.parse(text)
+      } catch (error) {
+        console.error('Invalid JSON response:', text)
+        throw new Error('Invalid response from server')
+      }
+
+      if (data.sessionId) {
+        setselectedId(id)
+        setSelectedSessionId(data.sessionId) // Set session ID if found
+        console.log('Found existing session:', data.sessionId)
+        await handleClick(data.sessionId, userIdFromToken, id)
+ 
+      } else {
+        const noId = ""
+        setselectedId(id)
+        setSelectedSessionId('')
+        await handleClick(id, userIdFromToken, id)
+        console.log('No session found, starting new chat')
+      }
     } catch (error: any) {
-      console.log("Error preparing new chat:", error.message);
+      console.log('Error preparing new chat:', error.message)
     } finally {
-      setMsgLoading(false);
+      setMsgLoading(false)
     }
-  };
-
+  }
 
 
 
@@ -807,7 +810,7 @@ export const Interested = ({
                 {/* Close Button */}
                 {searchQuery && (
                   <button
-                    onClick={() => setSearchQuery('')}
+                    onClick={closeSearch}
                     className="absolute top-1/2 right-6 transform -translate-y-1/2 text-primary-3/50 hover:text-primary-3 focus:outline-none"
                   >
                     ✕
@@ -817,9 +820,9 @@ export const Interested = ({
 
 
               {/* Modal for searched users */}
-              {showModal && (
+              {showModal && filteredSuggestions.length > 0 && (
                 <div className="w-full h-full ">
-                  <div className="bg-white p-2 shadow-lg w-full h-full max-h-56 flex flex-col max-w-md">
+                  <div className="bg-white p-2 shadow-lg w-full h-full max-h-56 flex flex-col overflow-y-auto">
                     <button
                       onClick={() => setShowModal(false)}
                       className="absolute top-2 right-2 p-1 bg-gray-200 rounded-lg cursor-pointer"
@@ -829,7 +832,7 @@ export const Interested = ({
                     <h3 className="font-bold pb-2 text-black/50 text-sm">
                       Search Results
                     </h3>
-                    <ul className="space-y-2 h-full overflow-y-auto">
+                    <ul className="space-y-2 w-full h-fit ">
                       {filteredUsers.map((user) => (
                         <li
                           key={user.detailsid}
@@ -945,11 +948,7 @@ export const Interested = ({
                   ref={containerRef} // Attach ref only to the scrolling container
                   className="h-full overflow-y-auto p-4 w-full scroll-none"
                 >
-                  {isMsgLoading ? (
-                    <div className="w-full h-full flex justify-center items-center">
-                      <Loader size={55} className="animate-spin" />
-                    </div>
-                  ) : messages.length === 0 ? (
+                  {messages.length === 0 ? (
                     <div className="w-full h-full flex justify-center items-center">
                       <div className="w-full h-full flex justify-center items-center">
                         <Lottie
