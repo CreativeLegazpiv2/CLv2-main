@@ -6,6 +6,7 @@ import { UserProfile } from "./components/UserProfile";
 import CollectionDisplay from "./components/CollectionDisplay";
 import { supabase } from "@/services/supabaseClient";
 import ProfileSkeletonUI from "@/components/Skeletal/ProfileSkeletonUI";
+import { ToastContainer } from "react-toastify";
 
 export interface UserDetail {
   detailsid: string;
@@ -145,6 +146,8 @@ export default function CollectionPage() {
 
       {/* Display the user's collection only if collectionData exists */}
       {collectionData && <CollectionDisplay collection={collectionData} />}
+
+      <ToastContainer />
     </div>
   );
 }

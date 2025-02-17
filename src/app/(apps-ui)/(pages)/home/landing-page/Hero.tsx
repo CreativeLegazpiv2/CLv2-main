@@ -20,7 +20,20 @@ export const Hero = () => {
         if (!result.data || !Array.isArray(result.data)) {
           throw new Error("Unexpected API response format");
         }
-        setImageSet(result.data);
+  
+        // Function to extract the actual file extension before any query params
+        const getFileExtension = (url: string) => {
+          const cleanUrl = url.split('?')[0]; // Remove query parameters
+          return cleanUrl.split('.').pop()?.toLowerCase() || ''; // Extract extension
+        };
+  
+        // Filter out .gif files
+        const filteredImages = result.data.filter((image: { path: string; title: string }) => {
+          const fileExtension = getFileExtension(image.path);
+          return fileExtension !== 'gif'; // Exclude GIFs
+        });
+  
+        setImageSet(filteredImages);
       } catch (error) {
         console.error("Error fetching images:", error);
         setImageSet([]);
@@ -28,6 +41,8 @@ export const Hero = () => {
     };
     fetchImages();
   }, []);
+  
+
 
   return (
     <div className="w-full h-screen bg-palette-5 overflow-hidden">

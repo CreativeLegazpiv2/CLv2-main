@@ -9,6 +9,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { checkTokenExpiration, logoutAndRedirect } from "@/services/jwt";
+import { X } from "lucide-react";
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret";
 
 interface props {
@@ -94,6 +95,15 @@ export default function PublishGallery({ openModal, setOpenModal }: props) {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Get file extension
+      const fileExtension = file.name.toLowerCase().split('.').pop();
+
+      // Allow only non-GIF images
+      if (fileExtension === 'gif') {
+        toast.error("GIF images are not allowed. Please upload PNG, JPG, or JPEG.");
+        return;
+      }
+
       setImagePreview(file);
     }
   };
@@ -129,6 +139,21 @@ export default function PublishGallery({ openModal, setOpenModal }: props) {
   };
 
   const handleUpload = async () => {
+
+    if (!formData.image) {
+      toast.error("Please upload an image.");
+      return;
+    }
+
+    // Extract file extension
+    const fileExtension = formData.image.name.toLowerCase().split('.').pop();
+
+    // Reject .gif images
+    if (fileExtension === 'gif') {
+      toast.error("GIF images are not allowed. Please upload PNG, JPG, or JPEG.");
+      return;
+    }
+
     const token = getSession();
     const Fname = localStorage.getItem("Fname") as string;
 
@@ -224,6 +249,7 @@ export default function PublishGallery({ openModal, setOpenModal }: props) {
       }}
       className="w-[90%] lg:max-w-screen-xl h-[80vh] overflow-hidden flex flex-col mx-auto bg-white rounded-lg p-4 relative"
     >
+      <X className="absolute top-4 right-4 cursor-pointer" onClick={() => setOpenModal(false)} size={25}/>
       <h2 className="text-3xl font-extrabold mb-2">PUBLISH COLLECTION</h2>
       <div className="p-4 rounded-lg h-full overflow-y-auto custom-scrollbar">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
