@@ -20,7 +20,7 @@ export const Signin = () => {
       <div className="relative w-full h-full xl:max-w-[60%] sm:max-w-[70%] max-w-[95%] mx-auto flex flex-col gap-10 justify-center items-center">
         <AccountCreation />
       </div>
-      <ToastContainer />
+      <ToastContainer position="top-right" />
     </div>
   );
 };

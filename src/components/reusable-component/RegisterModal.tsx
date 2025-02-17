@@ -32,12 +32,12 @@ const InputField: React.FC<InputFieldProps> = ({
   const isContactField = name === "contact";
 
   return (
-    <div className="relative w-full group">
-      <div className="flex items-center">
+    <div className=" w-full group">
+      <div className="flex items-center relative">
         {isContactField && (
           <span
             className={`mr-1 text-sm text-gray-700 absolute ${
-              isContactField ? "px-8" : ""
+              isContactField ? "pl-6" : "px-4"
             }`}
           >
             +63
@@ -58,17 +58,19 @@ const InputField: React.FC<InputFieldProps> = ({
         ) : (
           <input
             className={`w-full h-12 bg-transparent border-b-2 border-secondary-2/30 placeholder:text-sm ${
-              isContactField ? "pl-20" : "px-8"
+              isContactField ? "pl-16" : "px-8"
             }
                         text-palette-7 placeholder:text-palette-7/50 outline-none transition-all duration-300 
                         focus:border-secondary-2 [&:-webkit-autofill]:transition-[background-color_5000s_ease-in-out_0s]`}
-            type={type}
+            type={isContactField ? "tel" : type}
             name={name}
             placeholder={placeholder}
             autoComplete="off"
             required={required}
             value={value}
             onChange={onChange}
+            pattern={isContactField ? "[0-9]{10}" : undefined}
+            maxLength={isContactField ? 10 : undefined}
           />
         )}
         <Icon
@@ -296,28 +298,28 @@ export const RegisterModal = ({
                 {/* Personal Information */}
                 <InputField
                   icon="icon-park-solid:edit-name"
-                  placeholder="First Name"
+                  placeholder="First Name (*)"
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
                 />
                 <InputField
                   icon="icon-park-solid:edit-name"
-                  placeholder="Last Name"
+                  placeholder="Last Name (*)"
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
                 />
                 <InputField
                   icon="mdi:address-marker"
-                  placeholder="Mailing Address"
+                  placeholder="Mailing Address (*)"
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
                 />
                 <InputField
                   icon="mdi:email"
-                  placeholder="Email Address"
+                  placeholder="Email Address (*)"
                   type="email"
                   name="email"
                   value={formData.email}
@@ -340,7 +342,7 @@ export const RegisterModal = ({
                 {/* Online Portfolio */}
                 <InputField
                   icon="icon-park-solid:edit-name"
-                  placeholder="Online Portfolio (if available)"
+                  placeholder="Online Portfolio"
                   type="text"
                   name="portfolioLink"
                   value={formData.portfolioLink}
@@ -351,7 +353,7 @@ export const RegisterModal = ({
                 {/* Facebook Profile */}
                 <InputField
                   icon="mdi:facebook"
-                  placeholder="Facebook Profile (optional)"
+                  placeholder="Facebook"
                   type="text"
                   name="fb"
                   value={formData.fb}
@@ -362,7 +364,7 @@ export const RegisterModal = ({
                 <div className="md:col-span-1 col-span-2">
                   <InputField
                     icon="mdi:instagram"
-                    placeholder="Instagram Profile (optional)"
+                    placeholder="Instagram "
                     type="text"
                     name="ig"
                     value={formData.ig}

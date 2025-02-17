@@ -22,6 +22,7 @@ export const Form = () => {
     try {
       const user = await loginUser(username, password);
       console.log("Logged in user:", user);
+      toast.dismiss();
       toast.success("Successfully Logged In!", { position: "bottom-right" });
       if (user) {
         // Store the token in local storage or cookies
@@ -30,7 +31,14 @@ export const Form = () => {
       }
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message, { position: "bottom-right" });
+      toast.dismiss();
+      toast.error(err.message, {
+        position: "bottom-right",
+        autoClose: 5000, // close the toast after 5 seconds
+        onClose: () => {
+          // animate the toast out here
+        },
+      });
       setError(err.message);
     } finally {
       setLoading(false);

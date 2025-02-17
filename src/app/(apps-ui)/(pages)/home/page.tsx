@@ -18,7 +18,7 @@ import CreativeLaunchpad from "./landing-page/CreativeLaunchpad";
 import { EventDetailsModal } from "@/components/reusable-component/EventsDetailsModal";
 import { Events, ExtendedEventProps } from "./landing-page/EventsCarousel";
 import { RegisterModal } from "@/components/reusable-component/RegisterModal";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { RightSideGen } from "../../(user)/faqs/faqs-component/GeneralFaqs";
 
 export default function PofconLandingPage() {
@@ -61,6 +61,7 @@ export default function PofconLandingPage() {
 
   return (
     <main className="w-full h-fit text-primary-2 ">
+      <ToastContainer className={`z-[5000]`} />
       <ScrollAnimationSection>
         <Hero />
       </ScrollAnimationSection>

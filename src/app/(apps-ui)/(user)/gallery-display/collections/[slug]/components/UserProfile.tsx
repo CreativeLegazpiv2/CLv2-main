@@ -331,27 +331,27 @@ export const UserProfile: React.FC<UserProfileProps> = ({ initialUserDetail, col
                             transition={{ duration: 0.8 }}
                             className="w-full h-full min-h-[60dvh] relative flex justify-center items-center"
                         >
-                            {item.path && /\.(png|gif)(\?.*)?$/.test(item.path) ? (
-                                <div className="bg-none w-full h-full"></div>
+                            {/* {item.path && /\.(png|gif)(\?.*)?$/.test(item.path) ? (
+                                <div className="bg-none w-fit h-fit"></div>
                             ) : (
                                 <img
                                     src={item.path || "/images/creative-directory/profile.jpg"}
                                     className="w-full h-full md:object-cover object-contain absolute"
                                     alt="Image"
                                 />
-                            )}
+                            )} */}
 
 
                             <div className="w-full h-full absolute top-0 left-0 z-10 backdrop-blur-sm md:block hidden"></div>
                             <div className="w-full h-full p-12 absolute inset-0 z-20 flex items-center justify-center">
-                                <div className="w-full h-fit flex justify-center items-center rounded-xl p-6 bg-palette-6/20">
+                                <div className="w-fit h-full flex justify-center items-center rounded-xl p-6 bg-palette-6/20">
                                     <motion.img
                                         initial={{ opacity: 0, scale: 0.8 }}
                                         whileInView={{ opacity: 1, scale: 1 }}
                                         viewport={{ once: true }}
                                         transition={{ duration: 0.8 }}
                                         src={item.path || "/images/creative-directory/profile.jpg"}
-                                        className="h-fit w-fit object-contain rounded-xl"
+                                        className="h-full w-full object-obtain rounded-xl"
                                         alt=""
                                     />
                                 </div>
