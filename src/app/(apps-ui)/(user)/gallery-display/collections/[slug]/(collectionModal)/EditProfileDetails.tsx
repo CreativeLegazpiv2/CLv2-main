@@ -184,7 +184,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           </div>
 
           {/* Content */}
-          <form onSubmit={(e) => e.preventDefault()} className="p-4 overflow-y-auto max-h-[calc(90vh-8rem)]">
+          <form onSubmit={(e) => e.preventDefault()} className="p-4 overflow-y-auto scroll-none max-h-[calc(90vh-8rem)]">
             <div className="grid md:grid-cols-[300px,1fr] gap-8">
               {/* Left Column */}
               <div className="space-y-6">
@@ -293,7 +293,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   </div>
                 </div>
 
-               
+
 
                 {/* Contact Information */}
                 <div className="grid md:grid-cols-2 gap-4">
@@ -359,7 +359,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   </div>
                 )}
 
-<div className="grid md:grid-cols-2 gap-4">
+                <div className="grid md:grid-cols-2 gap-4">
                   <div className="relative w-full">
                     {/* Label */}
                     <label className="block text-sm font-medium text-palette-5/60 ml-1 mb-1">Gender</label>
@@ -391,22 +391,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                       </div>
                     )}
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-palette-5/60 ml-1">Portfolio Link</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Icon icon="dashicons:portfolio" className="w-5 h-5 text-palette-6/40" />
-                      </div>
-                      <input
-                        type="text"
-                        name="portfolioLink"
-                        value={formData.portfolioLink}
-                        onChange={handleInputChange}
-                        className="w-full pl-10 px-3 py-1.5 rounded-lg outline-none focus:outline focus:outline-palette-4 bg-palette-5/90 placeholder:text-palette-6/40"
-                        placeholder="Facebook profile URL"
-                      />
-                    </div>
-                  </div>
+                  
                 </div>
 
                 {/* Bio */}

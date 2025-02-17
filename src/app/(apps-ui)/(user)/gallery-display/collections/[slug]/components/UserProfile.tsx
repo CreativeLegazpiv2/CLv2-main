@@ -344,7 +344,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ initialUserDetail, col
 
                             <div className="w-full h-full absolute top-0 left-0 z-10 backdrop-blur-sm md:block hidden"></div>
                             <div className="w-full h-full p-12 absolute inset-0 z-20 flex items-center justify-center">
-                                <div className="w-full h-full flex justify-center items-center rounded-xl p-6 bg-palette-6/20">
+                                <div className="w-full h-fit flex justify-center items-center rounded-xl p-6 bg-palette-6/20">
                                     <motion.img
                                         initial={{ opacity: 0, scale: 0.8 }}
                                         whileInView={{ opacity: 1, scale: 1 }}
