@@ -176,7 +176,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ initialUserDetail, col
                             </motion.div>
                             <motion.div
                                 variants={fadeInUp}
-                                className="flex flex-col h-full md:justify-start md:items-start justify-center items-center w-full"
+                                className="flex flex-col h-full md:justify-start md:items-start justify-center items-center w-full z-[500]"
                             >
 
                                 <p>
@@ -203,7 +203,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ initialUserDetail, col
                                         })()
                                         : " "}
                                 </p>
-                                <Link href={initialUserDetail.portfolioLink} target="_blank">
+                                <Link href={initialUserDetail.portfolioLink} target="_blank" className="z-[500] cursor-pointer">
                                     <p className="text-palette-2 underline text-sm max-w-xs line-clamp-1">{initialUserDetail.portfolioLink || " "}</p>
                                 </Link>
 
@@ -329,10 +329,10 @@ export const UserProfile: React.FC<UserProfileProps> = ({ initialUserDetail, col
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.8 }}
-                            className="w-full h-full min-h-[60dvh] relative"
+                            className="w-full h-full min-h-[60dvh] relative flex justify-center items-center"
                         >
                             {item.path && /\.(png|gif)(\?.*)?$/.test(item.path) ? (
-                                <div className="bg-none"></div>
+                                <div className="bg-none w-full h-full"></div>
                             ) : (
                                 <img
                                     src={item.path || "/images/creative-directory/profile.jpg"}
@@ -343,15 +343,15 @@ export const UserProfile: React.FC<UserProfileProps> = ({ initialUserDetail, col
 
 
                             <div className="w-full h-full absolute top-0 left-0 z-10 backdrop-blur-sm md:block hidden"></div>
-                            <div className="p-12 absolute inset-0 z-20 flex items-center justify-center">
-                                <div className="w-fit h-full rounded-xl p-6 bg-palette-6/20">
+                            <div className="w-full h-full p-12 absolute inset-0 z-20 flex items-center justify-center">
+                                <div className="w-full h-full flex justify-center items-center rounded-xl p-6 bg-palette-6/20">
                                     <motion.img
                                         initial={{ opacity: 0, scale: 0.8 }}
                                         whileInView={{ opacity: 1, scale: 1 }}
                                         viewport={{ once: true }}
                                         transition={{ duration: 0.8 }}
                                         src={item.path || "/images/creative-directory/profile.jpg"}
-                                        className="max-w-full max-h-full object-contain shadow-lg rounded-xl"
+                                        className="h-fit w-fit object-contain rounded-xl"
                                         alt=""
                                     />
                                 </div>
