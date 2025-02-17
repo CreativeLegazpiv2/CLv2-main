@@ -31,7 +31,7 @@ interface ViewCollectionProps {
         images: {
             created_at: Date;
             generatedId: string;
-            image_path: string;
+            path: string;
             title: string;
             desc: string;
             artist: string;
@@ -89,7 +89,7 @@ export const ViewCollection = ({
     const [isEditModalOpen, setEditModalOpen] = useState(false);
     const [imageToDelete, setImageToDelete] = useState<{
         generatedId: string;
-        image_path: string;
+        path: string;
     } | null>(null);
     const [commentInput, setCommentInput] = useState("");
     const [comments, setComments] = useState<any[]>([]);
@@ -616,40 +616,42 @@ export const ViewCollection = ({
 
                                     {/* Edit and Delete Buttons */}
                                     {image.childid == getID && image.generatedId == generatedId && (
-                                        <div className="relative">
-                                            {/* Ellipsis Icon Button */}
-                                            <button
-                                                className="p-2 rounded-full hover:bg-gray-200"
-                                                onClick={() => setMenuOpen(!menuOpen)}
-                                            >
-                                                <EllipsisVertical className="text-gray-700" />
-                                            </button>
+                                        <div className="md:absolute  -right-2 -top-1.5 text-base w-fit rounded-full text-palette-6  duration-300 flex items-center gap-2">
+                                            <div className="relative">
+                                                {/* Ellipsis Icon Button */}
+                                                <button
+                                                    className="p-2 rounded-full hover:bg-gray-200"
+                                                    onClick={() => setMenuOpen(!menuOpen)}
+                                                >
+                                                    <EllipsisVertical className="text-gray-700" />
+                                                </button>
 
-                                            {/* Dropdown Menu */}
-                                            {menuOpen && (
-                                                <div className="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg border border-gray-200 z-50">
-                                                    <button
-                                                        className="block w-full text-left px-4 py-2 text-blue-500 hover:bg-gray-100"
-                                                        onClick={() => {
-                                                            onOpenEditModal(image)
-                                                            onClose()
-                                                            setMenuOpen(false)  // Close menu after action
-                                                        }}
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100"
-                                                        onClick={() => {
-                                                            onOpenDeleteModal(image)
-                                                            onClose()
-                                                            setMenuOpen(false)  // Close menu after action
-                                                        }}
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            )}
+                                                {/* Dropdown Menu */}
+                                                {menuOpen && (
+                                                    <div className="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+                                                        <button
+                                                            className="block w-full text-left px-4 py-2 text-blue-500 hover:bg-gray-100"
+                                                            onClick={() => {
+                                                                onOpenEditModal(image)
+                                                                onClose()
+                                                                setMenuOpen(false)  // Close menu after action
+                                                            }}
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100"
+                                                            onClick={() => {
+                                                                onOpenDeleteModal(image)
+                                                                onClose()
+                                                                setMenuOpen(false)  // Close menu after action
+                                                            }}
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     )}
                                 </div>

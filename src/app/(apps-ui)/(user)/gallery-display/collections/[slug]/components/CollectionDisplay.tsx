@@ -21,15 +21,17 @@ interface CollectionProps {
     images: {
       created_at: Date;
       generatedId: string;
-      image_path: string;
+      path: string;
       title: string;
       desc: string;
       artist: string;
       year: number;
       childid: string;
+      link?: string;
     }[];
   };
 }
+
 
 
 const CollectionDisplay: React.FC<CollectionProps> = ({ collection }) => {
@@ -41,7 +43,7 @@ const CollectionDisplay: React.FC<CollectionProps> = ({ collection }) => {
   const [isInterestModalOpen, setInterestModalOpen] = useState(false);
   const [imageToDelete, setImageToDelete] = useState<{
     generatedId: string;
-    image_path: string;
+    path: string;
   } | null>(null);
   const [chat, setChat] = useState(false);
 
@@ -113,7 +115,7 @@ const CollectionDisplay: React.FC<CollectionProps> = ({ collection }) => {
       await deleteCollectionItem(
         imageToDelete.generatedId,
         userId,
-        imageToDelete.image_path
+        imageToDelete.path
       );
       toast.success("Deleted successfully!", { position: "bottom-right" });
 
@@ -141,7 +143,7 @@ const CollectionDisplay: React.FC<CollectionProps> = ({ collection }) => {
     title: string;
     desc: string;
     year: number;
-    image_path: string | null;
+    path: string | null;
   }) => {
     if (!selectedImage) return;
 
@@ -164,7 +166,7 @@ const CollectionDisplay: React.FC<CollectionProps> = ({ collection }) => {
           ? {
             ...img,
             ...updatedData,
-            image_path: updatedData.image_path || "/images/default.jpg",
+            path: updatedData.path || "/images/default.jpg",
           }
           : img
       );
@@ -173,7 +175,7 @@ const CollectionDisplay: React.FC<CollectionProps> = ({ collection }) => {
       setSelectedImage({
         ...selectedImage,
         ...updatedData,
-        image_path: updatedData.image_path || "/images/default.jpg",
+        path: updatedData.path || "/images/default.jpg",
       });
 
       setEditModalOpen(false);
@@ -232,7 +234,7 @@ const CollectionDisplay: React.FC<CollectionProps> = ({ collection }) => {
               })
               .map((image, index) => (
                 <motion.div
-                  key={`${image.image_path}-${index}`}
+                  key={`${image.path}-${index}`}
                   className="mb-4 break-inside-avoid"
                   initial={{ scale: 0.6, opacity: 0 }}
                   whileInView={{
@@ -260,7 +262,7 @@ const CollectionDisplay: React.FC<CollectionProps> = ({ collection }) => {
                       </div>
                       <div className="max-h-[32rem] overflow-hidden">
                         <img
-                          src={image.image_path}
+                          src={image.path}
                           alt={image.title}
                           className="w-full h-fit object-fill"
                           style={{
@@ -294,7 +296,7 @@ const CollectionDisplay: React.FC<CollectionProps> = ({ collection }) => {
               <DeleteCollection
                 isOpen={isDeleteModalOpen}
                 generatedId={imageToDelete.generatedId}
-                imagePath={imageToDelete.image_path}
+                imagePath={imageToDelete.path}
                 userId={getID!}
                 onCancel={() => setDeleteModalOpen(false)}
                 onDelete={handleDelete}
@@ -322,7 +324,7 @@ const CollectionDisplay: React.FC<CollectionProps> = ({ collection }) => {
               childid={selectedImage.childid}
               created_at={selectedImage.created_at}
               artist={selectedImage.artist}
-              image={selectedImage.image_path}
+              image={selectedImage.path}
               title={selectedImage.title}
               desc={selectedImage.desc}
               year={selectedImage.year}
@@ -348,10 +350,11 @@ const CollectionDisplay: React.FC<CollectionProps> = ({ collection }) => {
               generatedId={selectedImage.generatedId}
               created_at={selectedImage.created_at}
               artist={selectedImage.artist}
-              image={selectedImage.image_path}
+              image={selectedImage.path}
               title={selectedImage.title}
               desc={selectedImage.desc}
               year={selectedImage.year}
+              link={selectedImage.link}
               onEdit={handleEdit}
               onCancel={() => setEditModalOpen(false)}
             />
@@ -376,7 +379,7 @@ const CollectionDisplay: React.FC<CollectionProps> = ({ collection }) => {
               collection={collection}
               generatedId={selectedImage.generatedId}
               created_at={selectedImage.created_at}
-              image={selectedImage.image_path}
+              image={selectedImage.path}
               title={selectedImage.title}
               desc={selectedImage.desc}
               year={selectedImage.year}

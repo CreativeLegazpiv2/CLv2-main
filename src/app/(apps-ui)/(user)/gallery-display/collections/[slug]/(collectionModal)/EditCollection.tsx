@@ -14,6 +14,7 @@ interface FormData {
   desc: string;
   year: number;
   artist: string;
+  link?: string;
   image: File | null; // Keep image property as File
 }
 
@@ -25,7 +26,8 @@ interface EditCollectionProps {
   desc: string;
   year: number;
   artist: string;
-  onEdit: (updatedData: Omit<FormData, 'image'> & { image_path: string | null }) => void; // Update type here
+  link?: string;
+  onEdit: (updatedData: Omit<FormData, 'image'> & { path: string | null }) => void; // Update type here
   onCancel: () => void;
 }
 export const EditCollection = ({
@@ -36,6 +38,7 @@ export const EditCollection = ({
   desc,
   year,
   artist,
+  link,
   onEdit,
   onCancel,
 }: EditCollectionProps) => {
@@ -49,6 +52,7 @@ export const EditCollection = ({
     desc,
     year,
     artist,
+    link,
     image: null, // Initialize image as null
   });
 
@@ -58,7 +62,7 @@ export const EditCollection = ({
     setPreviewImage(image);
     setOriginalImage(image); // Set original image
     setPreviewImage(image);
-    setFormData({ generatedId, created_at, title, desc, year, image: null, artist }); // Reset image in formData
+    setFormData({ generatedId, created_at, title, desc, year, image: null, artist, link }); // Reset image in formData
   }, [image, title, desc, year]);
 
   const handleChange = (
@@ -100,6 +104,7 @@ export const EditCollection = ({
       data.append('desc', formData.desc);
       data.append('year', formData.year.toString());
       data.append('artist', formData.artist);
+      data.append('link', formData.link || '');
 
       // Convert created_at to ISO string format
       const createdAtISO = new Date(formData.created_at).toISOString();
@@ -153,7 +158,8 @@ export const EditCollection = ({
         desc: formData.desc,
         year: formData.year,
         artist: formData.artist,
-        image_path: previewImage ? previewImage : originalImage, // Keep the original if no new image
+        link: formData.link,
+        path: previewImage ? previewImage : originalImage, // Keep the original if no new image
 
       });
       window.location.reload();
@@ -226,6 +232,22 @@ export const EditCollection = ({
             </div>
 
             <div className="space-y-4">
+            <div>
+                <label
+                  htmlFor="link"
+                  className="block text-sm font-medium text-primary-2"
+                >
+                  Link to video/audio
+                </label>
+                <input
+                  type="text"
+                  id="link"
+                  name="link"
+                  value={formData.link}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+              </div>
               <div>
                 <label
                   htmlFor="title"

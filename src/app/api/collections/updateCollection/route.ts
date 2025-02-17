@@ -14,6 +14,7 @@ export async function PUT(req: Request) {
     const imageBefore = formData.get('imageBefore') // The URL of the previous image
     const updatedData = {
       title: formData.get('title'),
+      link: formData.get('link'),
       desc: formData.get('desc'),
       year: formData.get('year'),
       artist: formData.get('artist'),
@@ -59,6 +60,7 @@ export async function PUT(req: Request) {
         year: updatedData.year,
         title: updatedData.title,
         artist: updatedData.artist,
+        link: updatedData.link,
         desc: updatedData.desc,
         created_at: new Date(),
       })
@@ -93,6 +95,7 @@ export async function PUT(req: Request) {
           year: updatedData.year,
           title: updatedData.title,
           artist: updatedData.artist,
+          link: updatedData.link,
           desc: updatedData.desc,
           created_at: new Date(),
         })

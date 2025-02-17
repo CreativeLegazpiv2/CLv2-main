@@ -9,6 +9,7 @@ import { jwtVerify } from "jose";
 import Image from "next/image";
 import { UserDetail } from "../page";
 import { ChevronDown } from "lucide-react";
+import { toast } from "react-toastify";
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret";
 
 interface ProfileModalProps {
@@ -35,6 +36,28 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     setIsOpen(false)
   }
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedField, setSelectedField] = useState("")
+
+  const creativeFieldOptions = [
+    "audiovisual-media",
+    "digital-interactive-media",
+    "creative-services",
+    "design",
+    "publishing-and-printing-media",
+    "performing-arts",
+    "visual-arts",
+    "traditional-and-cultural-expressions",
+    "cultural-sites"
+  ];
+
+  const handleSelectField = (field: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      creative_field: field, // Store the selected value inside formData
+    }));
+    setIsDropdownOpen(false); // Close dropdown after selection
+  };
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -94,53 +117,70 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = async () => {
-    setIsEditing(true);  // Start editing/loading state
 
+  const handleSave = async () => {
+    if (!/^09\d{9}$/.test(formData.mobileNo)) {
+      toast.error("Invalid mobile number! pattern must be 09XXXXXXXXX", {
+        position: "top-right",
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
+      return; // Stop form submission
+    }
+  
+    setIsEditing(true);
+  
     const token = getSession();
     if (!token) {
-      console.error("No token found, user may not be logged in.");
-      setErrorMessage("You must be logged in to save changes.");
-      setIsEditing(false);  // Stop editing/loading state
+      toast.error("You must be logged in to save changes.");
+      setIsEditing(false);
       return;
     }
-
+  
     try {
       const { payload } = await jwtVerify(token, new TextEncoder().encode(JWT_SECRET));
       const userId = payload.id as string;
-
+  
       const formDataToSend = new FormData();
       formDataToSend.append("detailsid", userId);
-      formDataToSend.append("userDetails", JSON.stringify(formData));
-
+      formDataToSend.append("userDetails", JSON.stringify({
+        ...formData,
+        creative_field: formData.creative_field,
+      }));
+  
       if (profilePicFile) {
         formDataToSend.append("profile_pic", profilePicFile);
       }
-
+  
       const response = await fetch("/api/creatives", {
         method: "PUT",
         headers: { Authorization: `Bearer ${userId}` },
         body: formDataToSend,
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
-        setErrorMessage(errorData.message || "Failed to update user details.");
+        toast.error(errorData.message || "Failed to update user details.");
         throw new Error(errorData.message);
       }
-
+  
       const updatedUserDetail: UserDetail = await response.json();
-      setFormData(updatedUserDetail);  // Update parent component's state
-      setOpenModal(false);  // Close the modal after successful save
+      setFormData(updatedUserDetail);
+      setOpenModal(false);
+      toast.success("Profile updated successfully!", { autoClose: 2000 });
       window.location.reload();
-
+  
     } catch (error) {
       console.error("Error updating user details:", error);
-      setErrorMessage("An error occurred while saving your changes.");
+      toast.error("An error occurred while saving your changes.");
     } finally {
-      setIsEditing(false);  // Always reset the loading state
+      setIsEditing(false);
     }
   };
+  
+
 
 
 
@@ -151,6 +191,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       setIsClosing(false);
     }, 500); // Adjust duration for the exit animation
   };
+
+
+
+
+
+
 
   return (
     <>
@@ -174,11 +220,11 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             <h2 className="text-xl font-semibold text-palette-5">Edit Profile</h2>
             <button
               onClick={handleClose}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-2   rounded-full transition-colors"
             >
               <Icon
                 icon="line-md:close-circle"
-                className="w-6 h-6 text-palette-5"
+                className="w-6 h-6 text-palette-5 hover:text-palette-7 hover:bg-gray-100 rounded-full"
               />
             </button>
           </div>
@@ -256,7 +302,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               </div>
 
               {/* Right Column */}
-              <div className="space-y-6">
+              <div className="space-y-8">
                 {/* Social Links */}
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
@@ -293,8 +339,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   </div>
                 </div>
 
-
-
                 {/* Contact Information */}
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
@@ -314,7 +358,9 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-palette-5/60 ml-1">Mobile Number</label>
+                    <label className="block text-sm font-medium text-palette-5/60 ml-1">
+                      Mobile Number
+                    </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Icon icon="ri:phone-line" className="w-5 h-5 text-palette-6/40" />
@@ -323,28 +369,70 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                         type="tel"
                         name="mobileNo"
                         value={formData.mobileNo}
-                        onChange={handleInputChange}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Allow only numbers
+                          if (!/^\d*$/.test(value)) return;
+                          // Validate length (max 11) and must start with "09"
+                          if ((value.length === 1 && value !== "0") || (value.length === 2 && value !== "09")) {
+                            return;
+                          }
+                          if (value.length <= 11) {
+                            setFormData((prev) => ({ ...prev, mobileNo: value }));
+                          }
+                        }}
                         className="w-full pl-10 px-3 py-1.5 rounded-lg outline-none focus:outline focus:outline-palette-4 bg-palette-5/90 placeholder:text-palette-6/40"
                         placeholder="Your phone number"
                       />
+                      {/* Error message */}
+                    {formData.mobileNo && !/^09\d{9}$/.test(formData.mobileNo) && (
+                      <p className="text-palette-2 text-xs mt-1 absolute">Mobile number must start with 09 and be 11 digits.</p>
+                    )}
                     </div>
+                    
                   </div>
+
                 </div>
 
                 {/* Professional Information */}
                 {formData.role !== "buyer" && (
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-palette-5/60 ml-1">Creative Field</label>
-                      <input
-                        type="text"
-                        name="creative_field"
-                        value={formData.creative_field}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-1.5 rounded-lg outline-none focus:outline focus:outline-palette-4 bg-palette-5/90 placeholder:text-palette-6/40"
-                        placeholder="Your creative field"
-                      />
+                  <div className="grid md:grid-cols-2 gap-4 ">
+
+                    <div className="relative">
+                      <label className="block text-sm font-medium text-palette-5/60 ml-1">
+                        Creative Field
+                      </label>
+
+                      {/* Custom Dropdown Trigger */}
+                      <div
+                        className="flex justify-between items-center w-full px-3 py-1.5 rounded-lg bg-palette-5/90 text-palette-6/90 cursor-pointer outline-none focus:outline focus:outline-palette-4"
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      >
+                        <span className={formData.creative_field ? "text-palette-7 " : "text-palette-6/40"}>
+                          {formData.creative_field
+                            ? formData.creative_field.replace(/-/g, " ")
+                            : "Select Creative Field"}
+                        </span>
+                        <ChevronDown className="w-5 h-5 text-palette-6" />
+                      </div>
+
+                      {/* Dropdown Options */}
+                      {isDropdownOpen && (
+                        <div className="absolute mt-1 w-full p-1 bg-palette-5 text-palette-6/90 shadow-lg rounded-lg z-50 max-h-60 overflow-auto scroll-none">
+                          {creativeFieldOptions.map((field) => (
+                            <div
+                              key={field}
+                              className={`px-4 py-2 cursor-pointer hover:bg-palette-6/30 rounded-xl ${formData.creative_field === field ? "bg-palette-6/30" : ""}`}
+                              onClick={() => handleSelectField(field)}
+                            >
+                              {field.replace(/-/g, " ")} {/* Show user-friendly name */}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
+
+
                     <div>
                       <label className="block text-sm font-medium text-palette-5/60 ml-1">Portfolio Link</label>
                       <input
@@ -362,26 +450,28 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="relative w-full">
                     {/* Label */}
-                    <label className="block text-sm font-medium text-palette-5/60 ml-1 mb-1">Gender</label>
+                    <label className="block text-sm font-medium text-palette-5/60 ml-1 mb-1">
+                      Gender
+                    </label>
 
                     {/* Custom Dropdown Trigger */}
                     <div
                       className="flex justify-between items-center w-full px-3 py-1.5 rounded-lg bg-palette-5/90 text-palette-6/90 cursor-pointer outline-none focus:outline focus:outline-palette-4"
                       onClick={() => setIsOpen(!isOpen)}
                     >
-                      <span className={formData.gender ? 'text-palette-7' : 'text-palette-6/40'}>
-                        {formData.gender || 'Select Gender'}
+                      <span className={formData.gender ? "text-palette-7" : "text-palette-6/40"}>
+                        {formData.gender || "Select Gender"}
                       </span>
                       <ChevronDown className="w-5 h-5 text-palette-6" />
                     </div>
 
                     {/* Dropdown Options */}
                     {isOpen && (
-                      <div className="absolute mt-1 w-full bg-palette-5 rounded-lg shadow-lg z-10">
-                        {genders.map((gender, index) => (
+                      <div className="absolute mt-1 w-full p-1 flex flex-col gap-2 bg-palette-5 rounded-lg shadow-lg z-10">
+                        {genders.map((gender) => (
                           <div
-                            key={index}
-                            className={`px-3 py-1.5 cursor-pointer hover:bg-palette-4/80 text-palette-7 ${formData.gender === gender ? 'bg-palette-4 text-white' : ''
+                            key={gender}
+                            className={`px-3 py-1.5 cursor-pointer rounded-lg hover:bg-palette-6/30 text-palette-6 ${formData.gender === gender ? "bg-palette-6/30" : ""
                               }`}
                             onClick={() => handleSelect(gender)}
                           >
@@ -391,7 +481,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                       </div>
                     )}
                   </div>
-                  
+
+
                 </div>
 
                 {/* Bio */}

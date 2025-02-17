@@ -24,6 +24,7 @@ export default function PublishGallery({ openModal, setOpenModal }: props) {
     title: "",
     desc: "",
     year: "",
+    link: "",
     image: null as File | null,
   });
 
@@ -139,34 +140,30 @@ export default function PublishGallery({ openModal, setOpenModal }: props) {
   };
 
   const handleUpload = async () => {
-
     if (!formData.image) {
       toast.error("Please upload an image.");
       return;
     }
-
+  
     // Extract file extension
     const fileExtension = formData.image.name.toLowerCase().split('.').pop();
-
+  
     // Reject .gif images
     if (fileExtension === 'gif') {
+      toast.dismiss();
       toast.error("GIF images are not allowed. Please upload PNG, JPG, or JPEG.");
       return;
     }
-
+  
     const token = getSession();
     const Fname = localStorage.getItem("Fname") as string;
-
+  
     if (!token) {
       toast.error("Session expired. Please log in again.");
       return;
     }
-
-    // Validate fields
-    if (!formData.image) {
-      toast.error("Please upload an image.");
-      return;
-    }
+  
+    // **Validate required fields, but allow an empty link**
     if (!formData.title.trim()) {
       toast.error("Title is required.");
       return;
@@ -179,22 +176,27 @@ export default function PublishGallery({ openModal, setOpenModal }: props) {
       toast.error("Year must be a valid 4-digit number.");
       return;
     }
-
-    setLoading(true); // Set loading to true when upload starts
-
+  
+    setLoading(true); // Start loading
+  
     try {
       const { payload } = await jwtVerify(
         token,
         new TextEncoder().encode(JWT_SECRET)
       );
       const userIdFromToken = payload.id as string;
-
+  
       const data = new FormData();
       data.append("image", formData.image as File);
       data.append("title", formData.title);
       data.append("desc", formData.desc);
       data.append("year", formData.year);
-
+  
+      // **Only append the link if it's provided**
+      if (formData.link.trim() !== "") {
+        data.append("link", formData.link);
+      }
+  
       const response = await fetch("/api/collections/publish", {
         method: "PUT",
         headers: {
@@ -203,36 +205,60 @@ export default function PublishGallery({ openModal, setOpenModal }: props) {
         },
         body: data,
       });
-
+  
       if (!response.ok) {
         const errorBody = await response.text();
         throw new Error(`Failed to send message: ${errorBody}`);
       }
-
+  
       const result = await response.json();
       console.log(result); // Handle success (optional)
-
+  
       setFormData({
         title: "",
         desc: "",
         year: "",
+        link: "", // Reset link, but it's optional
         image: null,
       });
       setPreviewImage(null);
       toast.success("Gallery published successfully!", {
         position: "bottom-right",
       });
-
+  
       setOpenModal(false);
-
       window.location.reload();
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Failed to publish gallery. Please try again.");
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false); // Stop loading
     }
   };
+  
+
+  const currentYear = new Date().getFullYear(); // Get current year dynamically
+
+  const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value; // Allow raw input as a string
+
+    // Prevent input of non-numeric values
+    if (!/^\d*$/.test(value)) return;
+
+    setFormData((prev) => ({ ...prev, year: value }));
+  };
+
+  // Validate only when the user finishes typing (on blur)
+  const handleYearBlur = () => {
+    let value = parseInt(formData.year, 10);
+
+    if (isNaN(value) || value < 1950 || value > currentYear) {
+      toast.dismiss();
+      toast.error(`Year must be between 1950 and ${currentYear}`);
+      setFormData((prev) => ({ ...prev, year: "" })); // Reset invalid input
+    }
+  };
+
 
   return (
 
@@ -249,7 +275,7 @@ export default function PublishGallery({ openModal, setOpenModal }: props) {
       }}
       className="w-[90%] lg:max-w-screen-xl h-[80vh] overflow-hidden flex flex-col mx-auto bg-white rounded-lg p-4 relative"
     >
-      <X className="absolute top-4 right-4 cursor-pointer" onClick={() => setOpenModal(false)} size={25}/>
+      <X className="absolute top-4 right-4 cursor-pointer" onClick={() => setOpenModal(false)} size={25} />
       <h2 className="text-3xl font-extrabold mb-2">PUBLISH COLLECTION</h2>
       <div className="p-4 rounded-lg h-full overflow-y-auto custom-scrollbar">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -287,8 +313,8 @@ export default function PublishGallery({ openModal, setOpenModal }: props) {
                         height="25"
                       />
 
-                      <p className="mt-1">
-                        Drag and drop files here or click to upload
+                      <p className="mt-1 text-sm">
+                        Drag and drop files here or click to upload image or thumbnail
                       </p>
                     </>
                   )}
@@ -297,12 +323,28 @@ export default function PublishGallery({ openModal, setOpenModal }: props) {
             </div>
 
             <div className="space-y-4">
+            <div>
+                <label
+                  htmlFor="link"
+                  className="text-sm font-medium text-gray-700 flex gap-2 items-start"
+                >
+                  Link to video/audio <span className={`text-[9px] uppercase  ${formData.link === "" ? "text-palette-2" : "text-gray-500 "}`}>(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  id="link"
+                  name="link"
+                  value={formData.link}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+              </div>
               <div>
                 <label
                   htmlFor="title"
-                  className="block text-sm font-medium text-gray-700"
+                  className="text-sm font-medium text-gray-700 flex gap-1 items-start"
                 >
-                  Title
+                  Title <span className={`text-xs  ${formData.title === "" ? "text-palette-2" : "text-gray-500"}`}>*</span>
                 </label>
                 <input
                   type="text"
@@ -317,16 +359,17 @@ export default function PublishGallery({ openModal, setOpenModal }: props) {
               <div>
                 <label
                   htmlFor="year"
-                  className="block text-sm font-medium text-gray-700 "
+                  className=" text-sm font-medium text-gray-700 flex gap-1 items-start"
                 >
-                  Year
+                  Year <span className={`text-xs  ${!validateYear(formData.year) ? "text-palette-2" : "text-gray-500"}`}>*</span>
                 </label>
                 <input
                   type="number"
                   id="year"
                   name="year"
                   value={formData.year}
-                  onChange={handleChange}
+                  onChange={handleYearChange} // Allow typing freely
+                  onBlur={handleYearBlur} // Validate after user stops typing
                   className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
               </div>
@@ -334,9 +377,9 @@ export default function PublishGallery({ openModal, setOpenModal }: props) {
               <div>
                 <label
                   htmlFor="desc"
-                  className="block text-sm font-medium text-gray-700"
+                  className="text-sm font-medium text-gray-700 flex gap-1 items-start"
                 >
-                  Description
+                  Description <span className={`text-xs  ${formData.desc === "" ? "text-palette-2" : "text-gray-500"}`}>*</span>
                 </label>
                 <textarea
                   id="desc"

@@ -222,14 +222,14 @@ export const Interested = ({
       setTimeout(() => {
         setIsLoading(false);
         setIsRightColumnVisible(true);
-      }, 2000)
+      }, 1500)
 
     } else {
       setChat(true);
       setTimeout(() => {
         setIsLoading(false);
         setIsRightColumnVisible(false);
-      }, 2000)
+      }, 1500)
     }
   }, []);
 
@@ -245,47 +245,44 @@ export const Interested = ({
   };
 
   const fetchSessionData = async () => {
-    const token = getSession(); // Assume getSession retrieves the session token
-
-    if (!token) {
-      console.log("No session token found.");
-      return;
-    }
-
+    console.log("Fetching recent messages...");
+    setIsLoading(true); // 🌟 Set loading before fetching
+  
+    const token = getSession();
+    if (!token) return;
+  
     try {
-      // Decode the token to extract the user ID
       const { payload } = await jwtVerify(
         token,
-        new TextEncoder().encode(JWT_SECRET) // Ensure JWT_SECRET is properly configured
+        new TextEncoder().encode(JWT_SECRET)
       );
       const userIdFromToken = payload.id as string;
-
-      // Call the API with the userId as a dynamic segment
+  
       const response = await fetch(`/api/chat/msg-recent/${userIdFromToken}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
       });
-
+  
       if (!response.ok) {
         console.log(`Failed to fetch sessions: ${response.statusText}`);
+        return;
       }
-
+  
       const data = await response.json();
-      console.log("Fetched sessions:", data);
-
-      if (Array.isArray(data) && data.length > 0) {
-        setSessions(data); // Assuming `setSessions` is a state setter
-      } else {
-        console.log("No sessions found.");
-      }
+  
+      // 🌟 Delay updating state for at least 2 seconds to avoid flicker
+      setTimeout(() => {
+        setSessions(Array.isArray(data) ? data : []);
+        setIsLoading(false);
+      }, 2000);
     } catch (error) {
       console.log("Error fetching session data:", error);
-    } finally {
-      setIsLoading(false); // Ensure loading state is reset
+      setTimeout(() => setIsLoading(false), 2000); // 🌟 Prevent immediate empty state
     }
   };
+  
 
   useEffect(() => {
     setPreviewImage(image);
@@ -857,7 +854,7 @@ export const Interested = ({
                             <strong className="text-sm"><p className="line-clamp-1">{user.first_name}</p></strong>
                             {user.role === "buyer" ? (
                               <span className="text-xs text-black/50">
-                                , {user.role}
+                                {user.role}
                               </span>
                             ) : (
                               <div className="text-xs text-black/50">
@@ -914,7 +911,7 @@ export const Interested = ({
                                 </strong>
                                 {session.userDetails.role === "buyer" ? (
                                   <span className="text-xs text-black/50">
-                                    , {session.userDetails.role}
+                                    {session.userDetails.role}
                                   </span>
                                 ) : (
                                   <div className="text-xs text-black/50">

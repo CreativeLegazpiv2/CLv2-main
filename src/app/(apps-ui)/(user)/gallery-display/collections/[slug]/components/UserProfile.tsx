@@ -28,28 +28,23 @@ export interface UserDetail {
     email?: string,
     gender?: string
 }
-
-
-interface CollectionItem {
-    created_at: Date;
-    generatedId: string;
-    path: string;
-    title: string;
-    desc: string;
-    artist: string;
-    year: number;
-    childid: string;
-}
-
-interface UserProfileProps {
+export interface UserProfileProps {
     initialUserDetail: UserDetail;
-    collection: CollectionItem[];
+    collection: {
+        created_at: Date;
+        generatedId: string;
+        path: string;
+        title: string;
+        desc: string;
+        artist: string;
+        year: number;
+        childid: string;
+        link?: string;
+    }[];
 }
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret";
 
 export const UserProfile: React.FC<UserProfileProps> = ({ initialUserDetail, collection }) => {
-
-
 
     const [showModal, setShowModal] = useState(false);
     const [getID, setID] = useState<string | null>(null);
@@ -78,6 +73,8 @@ export const UserProfile: React.FC<UserProfileProps> = ({ initialUserDetail, col
         fetchData();
     }, [initialUserDetail]);
 
+
+
     const fadeInUp = {
         initial: { opacity: 0, y: 20 },
         animate: { opacity: 1, y: 0 },
@@ -101,6 +98,9 @@ export const UserProfile: React.FC<UserProfileProps> = ({ initialUserDetail, col
             stiffness: 100
         }
     };
+
+
+
 
     return (
         <div className="min-h-dvh h-fit md:py-0 py-[5dvh] w-full flex flex-col text-primary-2 overflow-x-hidden">
@@ -217,7 +217,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ initialUserDetail, col
                         initial="initial"
                         whileInView="animate"
                         viewport={{ once: true }}
-                        className="w-full h-full lg:-mt-[5dvh] min-h-[50dvh] md:pb-[20dvh] py-[10dvh] flex relative z-[100] justify-center items-center"
+                        className="w-full h-full lg:-mt-[5dvh] min-h-[60dvh] md:pb-[20dvh] py-[10dvh] flex relative z-[100] justify-center items-center"
                     >
                         <motion.div
                             variants={slideIn}
@@ -289,10 +289,8 @@ export const UserProfile: React.FC<UserProfileProps> = ({ initialUserDetail, col
 
             </div>
 
-
-
             {/* Featured Latest Collection */}
-            {collection.slice(0, 1).map((item) => (
+            {collection.map((item) => (
                 <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
@@ -309,19 +307,35 @@ export const UserProfile: React.FC<UserProfileProps> = ({ initialUserDetail, col
                             viewport={{ once: true }}
                             className="w-full h-full text-palette-5 md:py-0 py-[5dvh]"
                         >
-                            <div className="w-full h-full md:max-w-[70%] max-w-[90%] mx-auto flex flex-col gap-2 md:items-start items-center justify-center">
-                                <motion.h1 variants={fadeInUp} className="uppercase title font-thin text-3xl flex w-fit items-center gap-2">
-                                    featured work, <span className="italic font-bold text-xl py-4 block md:hidden w-fit">{item.year}</span>
+                            <div className="w-full h-full md:max-w-[70%] max-w-[90%] mx-auto flex flex-col gap-2 items-start justify-center">
+                                <motion.h1 variants={fadeInUp} className="uppercase title font-thin text-3xl flex w-fit items-start gap-2">
+                                    featured work
                                 </motion.h1>
-                                <motion.h2 variants={fadeInUp} className="uppercase font-bolder text-5xl md:text-left text-center">
+                                <motion.div variants={fadeInUp} className="w-full italic font-bold text-xl flex flex-col gap-2 text-center items-start justify-center">
+                                    <div className="flex flex-row items-center justify-start gap-2 text-center w-full">
+                                        {item.year}
+                                        {item.link && item.link.trim() !== "" ? (
+                                            <Link href={item.link} target="_blank">
+                                                <span className="z-50 cursor-pointer underline text-palette-5 text-base block">
+                                                    <p className={`block max-w-xs ${item.link.length > 10 ? "truncate" : ""}`}>
+                                                        {item.link}
+                                                    </p>
+                                                </span>
+                                            </Link>
+                                        ) : (
+                                            <span className="text-gray-400"></span>
+                                        )}
+
+                                    </div>
+                                </motion.div>
+                                <motion.h2 variants={fadeInUp} className="w-full uppercase font-bolder text-3xl md:text-left ">
                                     {item.title}
                                 </motion.h2>
-                                <motion.span variants={fadeInUp} className="italic font-bold text-xl py-4 md:block hidden">
-                                    {item.year}
-                                </motion.span>
-                                <motion.p variants={fadeInUp} className="text-xl w-full max-w-xl font-thin md:block hidden">
+                                <motion.p variants={fadeInUp} className="text-xl w-full max-w-xl font-thin text-left pt-4">
                                     {item.desc}
                                 </motion.p>
+
+
                             </div>
                         </motion.div>
                         <motion.div
@@ -343,8 +357,8 @@ export const UserProfile: React.FC<UserProfileProps> = ({ initialUserDetail, col
 
 
                             <div className="w-full h-full absolute top-0 left-0 z-10 backdrop-blur-sm md:block hidden"></div>
-                            <div className="w-full h-full p-12 absolute inset-0 z-20 flex items-center justify-center">
-                                <div className="w-fit h-full flex justify-center items-center rounded-xl p-6 bg-palette-6/20">
+                            <div className="w-full h-full p-4 absolute inset-0 z-20 flex items-center justify-center">
+                                <div className="w-fit h-full flex justify-center items-center rounded-xl p-4 bg-palette-6/20">
                                     <motion.img
                                         initial={{ opacity: 0, scale: 0.8 }}
                                         whileInView={{ opacity: 1, scale: 1 }}

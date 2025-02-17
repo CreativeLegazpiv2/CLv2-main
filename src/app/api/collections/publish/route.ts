@@ -15,6 +15,7 @@ export async function PUT(request: Request) {
   const title = formData.get("title");
   const desc = formData.get("desc");
   const year = formData.get("year");
+  const link = formData.get("link");
   const artist = Fname;
   const imageFile = formData.get("image");
   const slug = `${userId}`;  // Slug to be used for matching
@@ -79,6 +80,7 @@ export async function PUT(request: Request) {
         year,
         artist,
         slug,
+        link,
         created_at: new Date(),
         image_path: publicURL
       })
@@ -99,6 +101,7 @@ export async function PUT(request: Request) {
         desc,
         year,
         artist,
+        link,
         slug,
         image_path: publicURL
       }]);
@@ -119,6 +122,7 @@ export async function PUT(request: Request) {
       desc,
       year,
       artist,
+      link,
       sluger: slug,
       path: publicURL
     }]);
