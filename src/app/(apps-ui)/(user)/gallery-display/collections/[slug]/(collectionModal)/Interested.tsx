@@ -185,6 +185,8 @@ export const Interested = ({
   }, []);
 
   useEffect(() => {
+    if (!selectedSessionId) return;
+  
     const subscription = supabase
       .channel("getMsg")
       .on(
@@ -195,15 +197,18 @@ export const Interested = ({
           table: "allmessage",
         },
         (payload: any) => {
-          setMessages((prev) => [...prev, payload.new]);
+          if (payload.new.sessionid === selectedSessionId) {
+            setMessages((prev) => [...prev, payload.new]);
+          }
         }
       )
       .subscribe();
-
+  
     return () => {
       supabase.removeChannel(subscription);
     };
-  }, []);
+  }, [selectedSessionId]); // Depend on selectedSessionId
+  
 
   useEffect(() => {
     getSessionToken();
