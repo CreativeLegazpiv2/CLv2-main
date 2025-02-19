@@ -53,7 +53,7 @@ interface SelectProps {
 
 export const SignupBuyer = () => {
   return (
-    <div className="w-full h-dvh lg:py-[20dvh] py-[15dvh] bg-[url('/images/signup/background.jpg')] bg-cover bg-no-repeat bg-center relative">
+    <div className="w-full h-dvh lg:py-[15dvh] py-[15dvh] bg-[url('/images/signup/background.jpg')] bg-cover bg-no-repeat bg-center relative">
       {/* Full height overlay covering the entire div */}
       <div className="absolute inset-0 w-full h-full bg-black/50"></div> {/* Increased opacity for better contrast */}
 

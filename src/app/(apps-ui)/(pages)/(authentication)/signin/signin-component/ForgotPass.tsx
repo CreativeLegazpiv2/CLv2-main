@@ -144,7 +144,7 @@ export const ForgotPass = ({ handleBackToLogin }: { handleBackToLogin: () => voi
               onClick={handleOtpRequest}
               disabled={loading || countdown > 0}
             >
-              Resend OTP 
+              Resend OTP
               ({countdown > 0 ? `${countdown}s` : "Resend"})
             </motion.button>
           ) : (
@@ -204,36 +204,38 @@ export const ForgotPass = ({ handleBackToLogin }: { handleBackToLogin: () => voi
       )}
       {/* Confirm Password Input */}
       {otpValid && (
-        <div className="w-full relative mt-4">
-          <input
-            className="w-full border-2 pl-12 h-12 border-palette-2/50 outline-none bg-transparent placeholder-palette-1 rounded-full focus:border-palette-2 transition-colors"
-            type={showConfirmPassword ? "text" : "password"} // Toggle input type based on showConfirmPassword state
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => {
-              setConfirmPassword(e.target.value);
-              if (e.target.value !== newPassword) {
-                setPasswordError("Passwords do not match.");
-              } else {
-                setPasswordError("");
-              }
-            }} // Set confirm password as the state
-          />
-          <Icon className="text-palette-1 absolute top-1/2 left-4 -translate-y-1/2" icon="mynaui:key" width="25" height="25" />
-          {/* Eye/EyeOff Icon for toggling password visibility */}
-          <button
-            type="button"
-            className="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)} // Toggle showConfirmPassword state
-          >
-            <Icon
-              icon={showConfirmPassword ? "mdi:eye-off" : "mdi:eye"} // Switch between Eye and EyeOff icons
-              width="25"
-              height="25"
-              className="text-palette-1"
+        <div className="w-full flex flex-col gap-2">
+          <div className="w-full relative mt-4 ">
+            <input
+              className="w-full border-2 pl-12 h-12 border-palette-2/50 outline-none bg-transparent placeholder-palette-1 rounded-full focus:border-palette-2 transition-colors"
+              type={showConfirmPassword ? "text" : "password"} // Toggle input type based on showConfirmPassword state
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+
+              }} // Set confirm password as the state
             />
-          </button>
-          {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
+            <Icon className="text-palette-1 absolute top-1/2 left-4 -translate-y-1/2" icon="mynaui:key" width="25" height="25" />
+            {/* Eye/EyeOff Icon for toggling password visibility */}
+            <button
+              type="button"
+              className="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)} // Toggle showConfirmPassword state
+            >
+              <Icon
+                icon={showConfirmPassword ? "mdi:eye-off" : "mdi:eye"} // Switch between Eye and EyeOff icons
+                width="25"
+                height="25"
+                className="text-palette-1"
+              />
+            </button>
+
+          </div>
+          <span className="ml-4">
+            {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
+          </span>
+
         </div>
       )}
       {/* Submit New Password */}

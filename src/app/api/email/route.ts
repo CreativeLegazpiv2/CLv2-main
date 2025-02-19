@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     const lastUpdated = user.otp_updated_at ? new Date(user.otp_updated_at) : null;
     const now = new Date();
     
-    if (lastUpdated && now.getTime() - lastUpdated.getTime() < 3 * 60 * 1000) {
+    if (lastUpdated && now.getTime() - lastUpdated.getTime() < 1 * 60 * 1000) {
       return NextResponse.json({ error: 'OTP can only be updated after 3 minutes' }, { status: 429 });
     }
 

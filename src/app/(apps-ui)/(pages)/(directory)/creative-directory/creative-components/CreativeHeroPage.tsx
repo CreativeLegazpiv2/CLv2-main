@@ -114,7 +114,7 @@ const SearchInput = () => {
         className="placeholder:text-palette-7 text-lg font-medium rounded-full bg-white ring-none 
                 outline-none w-full py-2.5 px-14"
         type="text"
-        placeholder="Search for a creative directory"
+        placeholder="Search for creative directory"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
       />

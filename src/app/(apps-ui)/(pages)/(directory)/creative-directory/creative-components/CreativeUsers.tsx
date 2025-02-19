@@ -26,6 +26,7 @@ const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 export const CreativeUsers = () => {
   const [creativeUsers, setCreativeUsers] = useState<CreativeArrayProps[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<CreativeArrayProps[]>([]);
+  const [searchInput, setSearchInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [visibleUsers, setVisibleUsers] = useState(6);
@@ -50,7 +51,6 @@ export const CreativeUsers = () => {
   // Function to filter users based on selected letter
   const handleLetterClick = (letter: string) => {
     if (selectedLetter === letter) {
-      // If the same letter is clicked again, reset filter
       setSelectedLetter(null);
       setFilteredUsers(creativeUsers);
     } else {
@@ -59,6 +59,18 @@ export const CreativeUsers = () => {
         creativeUsers.filter(user => user.first_name.toUpperCase().startsWith(letter))
       );
     }
+    setVisibleUsers(6); // Reset visible users count
+  };
+
+  // Handle search input changes
+  const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSearchInput(value);
+    const filtered = creativeUsers.filter(user =>
+      user.first_name.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+    setSelectedLetter(null); // Reset letter filter when searching
     setVisibleUsers(6); // Reset visible users count
   };
 
@@ -82,8 +94,10 @@ export const CreativeUsers = () => {
             <div className="w-full relative">
               <input
                 type="text"
-                className="w-full p-3.5 px-8 bg-palette-5/80 border border-black/20 rounded-full focus:outline-2 focus:outline-palette-2"
-                placeholder="Search for an artist"
+                value={searchInput}
+                onChange={handleSearchInput}
+                className="w-full p-3.5 px-8 bg-palette-5/80 border placeholder:text-sm placeholder:text-black/50 border-black/20 rounded-full focus:outline-2 focus:outline-palette-6"
+                placeholder="Search for an artist name or username "
               />
               <Search className="absolute top-1/2 -translate-y-1/2 right-4 text-black" />
             </div>
@@ -97,9 +111,8 @@ export const CreativeUsers = () => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => handleLetterClick(letter)}
-                className={`w-full font-extrabold poppins cursor-pointer text-center ${
-                  selectedLetter === letter ? "text-palette-3" : ""
-                }`}
+                className={`w-full font-extrabold poppins cursor-pointer text-center ${selectedLetter === letter ? "text-palette-2" : ""
+                  }`}
               >
                 {letter}
               </motion.div>
@@ -112,16 +125,16 @@ export const CreativeUsers = () => {
           {loading
             ? Array.from({ length: 6 }).map((_, index) => <UserCardSkeleton key={index} />)
             : filteredUsers.slice(0, visibleUsers).map((user, id) => (
-                <UserCard
-                  key={id}
-                  detailsid={user.detailsid}
-                  first_name={user.first_name}
-                  bday={user.bday}
-                  bio={user.bio}
-                  profile_pic={user.profile_pic}
-                  imageBg={user.imageBg}
-                />
-              ))}
+              <UserCard
+                key={id}
+                detailsid={user.detailsid}
+                first_name={user.first_name}
+                bday={user.bday}
+                bio={user.bio}
+                profile_pic={user.profile_pic}
+                imageBg={user.imageBg}
+              />
+            ))}
         </div>
 
         {/* Show More / Show Less Buttons */}
@@ -147,6 +160,7 @@ export const CreativeUsers = () => {
     </div>
   );
 };
+
 
 
 const calculateAge = (bDay: string | Date) => {
