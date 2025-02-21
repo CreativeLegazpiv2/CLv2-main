@@ -76,26 +76,19 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       const fileType = file.type;
-
-      // List of allowed file types
-      const allowedTypes = [
-        "image/jpeg",
-        "image/png",
-        "image/gif",
-        "image/tiff",
-        "image/bmp",
-      ];
-
-      if (!allowedTypes.includes(fileType)) {
-        setErrorMessage(
-          "Invalid image format. Only JPG, PNG, GIF, TIFF, and BMP files are allowed."
-        );
+      const fileSize = file.size / 1024 / 1024; // Convert to MB
+  
+      // Allow any image type, but limit the size to 30MB
+      const maxSize = 30; // 30MB
+      if (fileSize > maxSize) {
+        setErrorMessage("File is too large. Maximum allowed size is 30MB.");
         return;
       }
-
+  
+      // No file type restriction, only size limit
       setErrorMessage(null);
       setProfilePicFile(file);
-
+  
       const reader = new FileReader();
       reader.onloadend = () => {
         setFormData((prev) => ({
@@ -106,6 +99,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       reader.readAsDataURL(file);
     }
   };
+  
 
   const [isEditing, setIsEditing] = useState(false);
 
