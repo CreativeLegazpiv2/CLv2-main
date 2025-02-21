@@ -3,6 +3,7 @@ import { supabase } from '@/services/supabaseClient';
 import bcrypt from 'bcryptjs';
 import { createJWT, verifyJWT } from './jwt'; // Import createJWT and verifyJWT
 import { NextResponse } from 'next/server';
+
 export const loginUser = async (username: string, password: string) => {
   console.log("Attempting login with:", { username, password });
 
@@ -219,6 +220,8 @@ export const signupBuyer = async (
 
 
 
+let isSubmitting = false;
+
 export const signupUser = async (
   username: string,
   email: string,
@@ -235,6 +238,13 @@ export const signupUser = async (
   portfolioLink: string,
   gender: string,
 ) => {
+  if (isSubmitting) {
+    console.log("Signup already in progress.");
+    throw new Error("Please wait, submission is already in progress.");
+  }
+
+  isSubmitting = true; // Set the flag to true to prevent further submissions
+
   console.log("Attempting signup with:", { username, email });
 
   // Check if the username already exists
@@ -246,11 +256,13 @@ export const signupUser = async (
 
   if (existingUsername) {
     console.log("Signup failed: Username already exists");
+    isSubmitting = false; // Reset the flag
     throw new Error("Signup failed: Username already exists.");
   }
 
   if (usernameCheckError && usernameCheckError.code !== "PGRST116") {
     console.log("Error checking username existence:", usernameCheckError.message);
+    isSubmitting = false; // Reset the flag
     throw new Error("Signup failed, please try again.");
   }
 
@@ -263,11 +275,13 @@ export const signupUser = async (
 
   if (existingUser) {
     console.log("Signup failed: Email already exists");
-    throw new Error("Signup failed:Email already exists.");
+    isSubmitting = false; // Reset the flag
+    throw new Error("Signup failed: Email already exists.");
   }
 
   if (emailCheckError && emailCheckError.code !== "PGRST116") {
     console.log("Error checking email existence:", emailCheckError.message);
+    isSubmitting = false; // Reset the flag
     throw new Error("Signup failed, please try again.");
   }
 
@@ -284,6 +298,7 @@ export const signupUser = async (
 
   if (userError || !userData) {
     console.log("Signup failed:", userError ? userError.message : "Unknown error");
+    isSubmitting = false; // Reset the flag
     throw new Error("Signup failed, please try again.");
   }
 
@@ -311,6 +326,7 @@ export const signupUser = async (
 
   if (detailsError) {
     console.log("Failed to insert user details:", detailsError.message);
+    isSubmitting = false; // Reset the flag
     throw new Error("Signup failed, could not insert user details.");
   }
 
@@ -319,8 +335,11 @@ export const signupUser = async (
   // Create JWT
   const token = await createJWT({ id: userData.id, username: userData.username });
 
+  isSubmitting = false; // Reset the flag after successful submission
+
   return { id: userData.id, username: userData.username, token };
 };
+
 
 
 

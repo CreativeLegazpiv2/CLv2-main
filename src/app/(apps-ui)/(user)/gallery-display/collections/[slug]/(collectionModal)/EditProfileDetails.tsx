@@ -119,8 +119,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
 
   const handleSave = async () => {
-    if (!/^09\d{9}$/.test(formData.mobileNo)) {
-      toast.error("Invalid mobile number! pattern must be 09XXXXXXXXX", {
+    // Validate mobile number
+    const mobileNumberPattern = /^(09\d{9}|\+63\d{10})$/;
+    if (!mobileNumberPattern.test(formData.mobileNo)) {
+      toast.error("Invalid mobile number! Pattern must be 09XXXXXXXXX or +63XXXXXXXXX.", {
         position: "top-right",
         closeOnClick: true,
         pauseOnHover: true,
@@ -129,49 +131,49 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       });
       return; // Stop form submission
     }
-  
+
     setIsEditing(true);
-  
+
     const token = getSession();
     if (!token) {
       toast.error("You must be logged in to save changes.");
       setIsEditing(false);
       return;
     }
-  
+
     try {
       const { payload } = await jwtVerify(token, new TextEncoder().encode(JWT_SECRET));
       const userId = payload.id as string;
-  
+
       const formDataToSend = new FormData();
       formDataToSend.append("detailsid", userId);
       formDataToSend.append("userDetails", JSON.stringify({
         ...formData,
         creative_field: formData.creative_field,
       }));
-  
+
       if (profilePicFile) {
         formDataToSend.append("profile_pic", profilePicFile);
       }
-  
+
       const response = await fetch("/api/creatives", {
         method: "PUT",
         headers: { Authorization: `Bearer ${userId}` },
         body: formDataToSend,
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         toast.error(errorData.message || "Failed to update user details.");
         throw new Error(errorData.message);
       }
-  
+
       const updatedUserDetail: UserDetail = await response.json();
       setFormData(updatedUserDetail);
       setOpenModal(false);
       toast.success("Profile updated successfully!", { autoClose: 2000 });
       window.location.reload();
-  
+
     } catch (error) {
       console.error("Error updating user details:", error);
       toast.error("An error occurred while saving your changes.");
@@ -179,7 +181,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       setIsEditing(false);
     }
   };
-  
+
 
 
 
@@ -371,13 +373,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                         value={formData.mobileNo}
                         onChange={(e) => {
                           const value = e.target.value;
-                          // Allow only numbers
-                          if (!/^\d*$/.test(value)) return;
-                          // Validate length (max 11) and must start with "09"
-                          if ((value.length === 1 && value !== "0") || (value.length === 2 && value !== "09")) {
-                            return;
-                          }
-                          if (value.length <= 11) {
+                          // Allow numbers and let the user edit the input freely
+                          if (/^\+?\d*$/.test(value)) {
                             setFormData((prev) => ({ ...prev, mobileNo: value }));
                           }
                         }}
@@ -385,11 +382,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                         placeholder="Your phone number"
                       />
                       {/* Error message */}
-                    {formData.mobileNo && !/^09\d{9}$/.test(formData.mobileNo) && (
-                      <p className="text-palette-2 text-xs mt-1 absolute">Mobile number must start with 09 and be 11 digits.</p>
-                    )}
+                      {formData.mobileNo && !/^(09\d{9}|\+63\d{10})$/.test(formData.mobileNo) && (
+                        <p className="text-palette-2 text-xs mt-1 absolute">
+                          Mobile number must start with +63 or 09 and be 11 or 13 digits long.
+                        </p>
+                      )}
                     </div>
-                    
                   </div>
 
                 </div>

@@ -519,10 +519,10 @@ export default function RegisterForm() {
                                         key={option}
                                         onClick={() => handleOptionToggle(option)}
                                         className={`px-4 py-2 rounded-full transition ${answers.creativeField.includes(option)
-                                                ? 'bg-[#403737] text-white shadow-lg'
-                                                : answers.gender == option
-                                                    ? 'bg-[#939292] text-white shadow-lg'
-                                                    : 'bg-gray-200 text-black'
+                                            ? 'bg-[#403737] text-white shadow-lg'
+                                            : answers.gender == option
+                                                ? 'bg-[#939292] text-white shadow-lg'
+                                                : 'bg-gray-200 text-black'
                                             } hover:bg-[#939292] hover:scale-105 transform focus:outline-none focus:ring-2 focus:ring-[#403737]`}
                                     >
                                         {option}
@@ -561,13 +561,13 @@ export default function RegisterForm() {
                             <button
                                 onClick={nextQuestion}
                                 disabled={loading} // Disable button during loading
-                                className={`bg-[#403737] text-white px-6 py-3 rounded-full hover:bg-[#2f2f2f] transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#2f2f2f] shadow-lg ${loading ? 'opacity-50 cursor-not-allowed' : ''
-                                    }`}
+                                className={`bg-[#403737] text-white px-6 py-3 rounded-full hover:bg-[#2f2f2f] transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#2f2f2f] shadow-lg ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 {loading ? 'Submitting...' :
                                     currentQuestion === questions.length - 1 ? 'Submit' :
                                         answers[questions[currentQuestion].id as keyof FormAnswers] === '' && !questions[currentQuestion].required ? 'Skip' : 'Next'}
                             </button>
+
                         </div>
                     </div>
                 )}
