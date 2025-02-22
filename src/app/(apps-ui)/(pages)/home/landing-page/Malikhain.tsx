@@ -22,15 +22,6 @@ export const Malikhain = () => {
           dynamic future in the Philippines. Witness the power of creativity at
           the heart of economic progress with the Malikhaing Pinoy Program.
         </p>
-        <motion.button
-          onClick={handleLearnMoreClick} // Redirect to the specified link
-          className="w-full md:max-w-sm max-w-xs py-3 font-medium rounded-full title uppercase bg-palette-6 text-2xl text-secondary-1 relative flex items-center justify-center"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Learn More
-          <img className="absolute right-10 w-5 h-5" src="../SVG/navigate.svg" alt="" />
-        </motion.button>
       </div>
     </div>
   );

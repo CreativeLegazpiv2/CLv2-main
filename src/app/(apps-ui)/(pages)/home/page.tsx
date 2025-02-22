@@ -20,6 +20,8 @@ import { Events, ExtendedEventProps } from "./landing-page/EventsCarousel";
 import { RegisterModal } from "@/components/reusable-component/RegisterModal";
 import { toast, ToastContainer } from "react-toastify";
 import { RightSideGen } from "../../(user)/faqs/faqs-component/GeneralFaqs";
+import { VisionMission } from "./landing-page/VisionMission"; // Import the new component
+import { FeaturedArtist } from "./landing-page/FeaturedArtist";
 
 export default function PofconLandingPage() {
   const [showPofconModal, setShowPofconModal] = useState(false); // Modal state
@@ -66,15 +68,26 @@ export default function PofconLandingPage() {
         <Hero />
       </ScrollAnimationSection>
 
+      <ScrollAnimationSection>
+        <VisionMission />
+      </ScrollAnimationSection>
+
       <CreativeDirectory />
 
       <ScrollAnimationSection>
         <Events onEventClick={handleEventClick} />
       </ScrollAnimationSection>
 
-      <ScrollAnimationSection>
+      {/* <ScrollAnimationSection>
         <CreativeLaunchpad />
       </ScrollAnimationSection>
+ */}
+
+      <ScrollAnimationSection>
+  <FeaturedArtist />
+</ScrollAnimationSection>
+      {/* Add the Vision & Mission section here */}
+
 
       <ScrollAnimationSection>
         <GallerySection />
