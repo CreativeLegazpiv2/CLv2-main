@@ -76,20 +76,20 @@ export const UpcomingEvents = () => {
       const response = await fetch("/api/admin-events");
       if (!response.ok) throw new Error("Error fetching events");
       const fetchedEvents: AdminEvent[] = await response.json();
-  
+
       // Get the current date and set time to the start of the day
       const currentDateObj = new Date();
       currentDateObj.setHours(0, 0, 0, 0); // Strip time component
-  
+
       // Filter events to show only those on or after the current date and with status true
       const upcomingEvents = fetchedEvents.filter((event) => {
         const eventDate = new Date(event.date);
         eventDate.setHours(0, 0, 0, 0); // Strip time component from event date
-  
+
         // Only include events on or after the current date and with status true
         return eventDate >= currentDateObj && event.status !== false;
       });
-  
+
       setEvents(upcomingEvents);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -112,15 +112,27 @@ export const UpcomingEvents = () => {
   }, []);
 
   return (
-    <div className="w-full h-fit min-h-dvh max-w-[90%] mx-auto py-[15dvh] flex flex-col gap-6">
+    <div className="w-full h-fit min-h-dvh  mx-auto py-[15dvh] overflow-hidden flex flex-col gap-6 relative bg-gradient-to-br from-palette-5 to-palette-5/90">
+      {/* Decorative elements */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
+        <div className="absolute top-0 right-0 w-full h-64 bg-palette-2/30 -skew-y-6 translate-y-20 transform-gpu"></div>
+        <div className="absolute bottom-0 left-0 w-full h-64 bg-palette-1/20 -skew-y-6 -translate-y-32 transform-gpu"></div>
+      </div>
+
+      {/* Floating decorative shapes */}
+      <div className="absolute w-32 h-32 md:w-48 md:h-48 rounded-full border-4 border-palette-2/10 top-20 -left-16 opacity-60"></div>
+      <div className="absolute w-40 h-40 md:w-64 md:h-64 rounded-full border-4 border-palette-1/10 -bottom-20 -right-20 opacity-60"></div>
+      <div className="absolute w-24 h-24 rotate-45 border-2 border-palette-2/10 top-40 right-20 opacity-60"></div>
+
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="w-full text-center"
       >
-        <h1 className="font-extrabold text-5xl sm:text-6xl lg:text-7xl text-primary-3 uppercase">
-          Upcoming Events
+
+        <h1 className="font-extrabold text-5xl sm:text-6xl lg:text-7xl text-palette-1 uppercase">
+          Upcomin<span className="text-palette-2">g</span> Events
         </h1>
       </motion.div>
       <motion.div
@@ -218,75 +230,73 @@ const EventGrid: React.FC<{
   setSelectedEvent,
   setShowEventDetailsModal, // Destructure the prop
 }) => {
-  // Filter events to show only those in the selected month
-  const filteredEvents = events.filter((event) => {
-    const eventDate = new Date(event.date);
-    const selectedMonth = currentDate.getMonth();
-    const selectedYear = currentDate.getFullYear();
-    return (
-      eventDate.getMonth() === selectedMonth &&
-      eventDate.getFullYear() === selectedYear
+    // Filter events to show only those in the selected month
+    const filteredEvents = events.filter((event) => {
+      const eventDate = new Date(event.date);
+      const selectedMonth = currentDate.getMonth();
+      const selectedYear = currentDate.getFullYear();
+      return (
+        eventDate.getMonth() === selectedMonth &&
+        eventDate.getFullYear() === selectedYear
+      );
+    });
+
+    // Group events by date
+    const groupedEvents = groupEventsByDate(filteredEvents);
+    const sortedDates = Object.keys(groupedEvents).sort(
+      (a, b) => new Date(a).getTime() - new Date(b).getTime()
     );
-  });
 
-  // Group events by date
-  const groupedEvents = groupEventsByDate(filteredEvents);
-  const sortedDates = Object.keys(groupedEvents).sort(
-    (a, b) => new Date(a).getTime() - new Date(b).getTime()
-  );
-
-  return (
-    <div className="w-full h-fit flex flex-col gap-12 relative">
-      <div className="w-full flex justify-end items-center">
-        <ListButton list={list} setList={setList} />
-      </div>
-      {sortedDates.length > 0 ? (
-        sortedDates.map((date, groupIndex) => (
-          <div key={date}>
-            <h1 className="font-bold text-3xl sm:text-4xl uppercase pb-8 text-center md:text-left">
-              {(() => {
-                const dateObject = new Date(date);
-                const day = dateObject.getDate().toString().padStart(2, "0");
-                const weekday = dateObject.toLocaleDateString("en-US", {
-                  weekday: "long",
-                });
-                return `${day} - ${weekday}`;
-              })()}
-            </h1>
-            <div
-              className={`w-full h-fit ${
-                list
-                  ? "flex flex-col gap-4"
-                  : "grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-8"
-              }`}
-            >
-              {groupedEvents[date].map((event) => (
-                <EventCard
-                  event={event}
-                  key={event.id}
-                  groupIndex={groupIndex}
-                  list={list}
-                  setShowPofconModal={setShowPofconModal}
-                  setSelectedEvent={setSelectedEvent}
-                  setShowEventDetailsModal={setShowEventDetailsModal} // Pass the prop
-                />
-              ))}
+    return (
+      <div className="w-full h-fit flex flex-col gap-12 relative max-w-[90%] mx-auto">
+        <div className="w-full flex justify-end items-center">
+          <ListButton list={list} setList={setList} />
+        </div>
+        {sortedDates.length > 0 ? (
+          sortedDates.map((date, groupIndex) => (
+            <div key={date}>
+              <h1 className="font-bold text-3xl sm:text-4xl uppercase pb-8 text-center md:text-left">
+                {(() => {
+                  const dateObject = new Date(date);
+                  const day = dateObject.getDate().toString().padStart(2, "0");
+                  const weekday = dateObject.toLocaleDateString("en-US", {
+                    weekday: "long",
+                  });
+                  return `${day} - ${weekday}`;
+                })()}
+              </h1>
+              <div
+                className={`w-full h-fit ${list
+                    ? "flex flex-col gap-4"
+                    : "grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-8"
+                  }`}
+              >
+                {groupedEvents[date].map((event) => (
+                  <EventCard
+                    event={event}
+                    key={event.id}
+                    groupIndex={groupIndex}
+                    list={list}
+                    setShowPofconModal={setShowPofconModal}
+                    setSelectedEvent={setSelectedEvent}
+                    setShowEventDetailsModal={setShowEventDetailsModal} // Pass the prop
+                  />
+                ))}
+              </div>
+              <div
+                className={`w-full h-[1px] bg-primary-1 mt-12 ${list ? "hidden" : ""
+                  }`}
+              ></div>
             </div>
-            <div
-              className={`w-full h-[1px] bg-primary-1 mt-12 ${
-                list ? "hidden" : ""
-              }`}
-            ></div>
-          </div>
-        ))
-      ) : (
-        <p className="text-center text-2xl font-semibold mt-12">
-          No events available for this month
-        </p>
-      )}
-    </div>
-  );
-};
+          ))
+        ) : (
+          <p className="text-center text-2xl font-semibold mt-12">
+            No events available for this month
+          </p>
+        )}
+      </div>
+    );
+  };
 
 const EventCard: React.FC<{
   event: AdminEvent;
@@ -309,13 +319,11 @@ const EventCard: React.FC<{
     <motion.div
       whileHover={{ scale: 1.02, backgroundColor: "transparent" }}
       transition={{ duration: 0.2 }}
-      className={`w-full ${
-        list
+      className={`w-full ${list
           ? "flex flex-row gap-6 items-center p-6 rounded-lg shadow-md"
           : "flex flex-col gap-4 p-6 rounded-lg shadow-md"
-      } ${colorClasses.bgColor} border-2 ${
-        colorClasses.border
-      } transition-all duration-300 group`}
+        } ${colorClasses.bgColor} border-2 ${colorClasses.border
+        } transition-all duration-300 group`}
     >
       <div className={`${list ? "h-24 w-44" : "h-48 w-full"}`}>
         <img
@@ -325,11 +333,10 @@ const EventCard: React.FC<{
         />
       </div>
       <div
-        className={`w-full flex gap-4 ${
-          list ? "flex-col-reverse" : "flex-col"
-        }`}
+        className={`w-full flex gap-4 ${list ? "flex-col-reverse" : "flex-col"
+          }`}
       >
-        <div className="w-full flex justify-between items-center">
+        <div className="w-full  flex justify-between items-center">
           <div className="w-fit flex flex-col leading-3 gap-2">
             <p className={`font-bold group-hover:${colorClasses.textColor}`}>
               {formatTimeTo12Hour(event.start_time)} -{" "}
@@ -341,9 +348,8 @@ const EventCard: React.FC<{
           </div>
           <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.05 }}>
             <Icon
-              className={`rotate-180 -mt-4 cursor-pointer ${
-                list ? "hidden" : "block"
-              } group-hover:${colorClasses.textColor}`}
+              className={`rotate-180 -mt-4 cursor-pointer ${list ? "hidden" : "block"
+                } group-hover:${colorClasses.textColor}`}
               icon="ph:arrow-left-bold"
               width="25"
               height="25"
@@ -352,9 +358,8 @@ const EventCard: React.FC<{
         </div>
         <div className="w-full">
           <h1
-            className={`w-full text-xl font-semibold ${
-              list ? "max-w-full" : "max-w-56"
-            } group-hover:${colorClasses.textColor}`}
+            className={`w-full text-xl font-semibold ${list ? "max-w-full" : "max-w-56"
+              } group-hover:${colorClasses.textColor}`}
           >
             {event.title}
           </h1>

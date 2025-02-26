@@ -1,111 +1,203 @@
+
+
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-interface Event {
-  title: string;
-  created_at: string;
-  image_url: string;
-}
-
 export const EventHeroPage = () => {
-  const [events, setEvents] = useState<Event[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(true);
+  const [imageSet, setImageSet] = useState<{ image_url: string; title: string }[]>([]);
 
+  // Fetch images only once when the component mounts
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchImages = async () => {
       try {
         const response = await fetch("/api/featured/fetch");
+        // const response = await fetch("/api/collections/homepage");
         if (!response.ok) {
-          throw new Error("Failed to fetch events");
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
-
         const result = await response.json();
-        const fetchedEvents: Event[] = result.data;
-
-        if (fetchedEvents.length > 0) {
-          setEvents(fetchedEvents);
+        if (!result.data || !Array.isArray(result.data)) {
+          throw new Error("Unexpected API response format");
         }
+
+        // Function to extract the actual file extension before any query params
+        const getFileExtension = (url: string) => {
+          const cleanUrl = url.split('?')[0]; // Remove query parameters
+          return cleanUrl.split('.').pop()?.toLowerCase() || ''; // Extract extension
+        };
+
+        // Filter out .gif files
+        const filteredImages = result.data.filter((image: { image_url: string; title: string }) => {
+          const fileExtension = getFileExtension(image.image_url);
+          return fileExtension !== 'gif'; // Exclude GIFs
+        });
+
+        setImageSet(filteredImages);
       } catch (error) {
-        console.error("Error fetching events:", error);
+        console.error("Error fetching images:", error);
+        setImageSet([]);
       }
     };
-
-    fetchEvents();
+    fetchImages();
   }, []);
 
-  const totalSlides = events.length;
+  return (
+    <>
+      <RightSide currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} />
+    </>
+  );
+};
 
-  // Auto-change event every 5 seconds
+
+const RightSide = ({
+  currentIndex,
+  setCurrentIndex,
+}: {
+  currentIndex: number
+  setCurrentIndex: React.Dispatch<React.SetStateAction<number>>
+}) => {
+  const [imageSet, setImageSet] = useState<{ image_url: string; title: string }[]>([])
+  const [isTransitioning, setIsTransitioning] = useState(true)
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  // Fetch images from API
   useEffect(() => {
-    if (totalSlides <= 1) return;
+    const fetchImages = async () => {
+      try {
+        const response = await fetch("/api/featured/fetch")
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`)
+        }
+        const result = await response.json()
+        if (!result.data || !Array.isArray(result.data)) {
+          throw new Error("Unexpected API response format")
+        }
+        setImageSet(result.data)
+      } catch (error) {
+        console.error("Error fetching images:", error)
+        setImageSet([])
+      }
+    }
+    fetchImages()
+  }, [])
+
+  const totalSlides = imageSet.length
+
+  // Update active index when currentIndex changes
+  useEffect(() => {
+    if (currentIndex === totalSlides) {
+      setTimeout(() => setActiveIndex(0), 100) // Small delay prevents flicker
+    } else {
+      setActiveIndex(currentIndex)
+    }
+  }, [currentIndex, totalSlides])
+
+  // Auto-advance the carousel every 5 seconds
+  useEffect(() => {
+    if (totalSlides <= 1) return
 
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % totalSlides);
-    }, 5000);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % (totalSlides + 1))
+    }, 5000)
 
-    return () => clearInterval(interval);
-  }, [totalSlides]);
+    return () => clearInterval(interval)
+  }, [setCurrentIndex, totalSlides])
 
   // Handle the end of the transition
   const handleTransitionEnd = () => {
     if (currentIndex === totalSlides) {
-      setIsTransitioning(false);
-      setCurrentIndex(0); // Reset to the first image
+      setTimeout(() => {
+        setIsTransitioning(false)
+        setCurrentIndex(0) // Instantly reset to first slide without flicker
+      }, 100) // Small delay allows transition to complete
     }
-  };
+  }
 
   // Delay before restarting the transition
   useEffect(() => {
     if (!isTransitioning) {
       const timeout = setTimeout(() => {
-        setIsTransitioning(true);
-      }, 50); // Match this delay with the animation duration
-      return () => clearTimeout(timeout);
+        setIsTransitioning(true)
+      }, 50)
+      return () => clearTimeout(timeout)
     }
-  }, [isTransitioning]);
+  }, [isTransitioning])
 
-  if (events.length === 0) {
-    return null;
+  // Render nothing if imageSet is empty
+  if (imageSet.length === 0) {
+    return <div className="text-center"></div>
   }
 
+  // Clone first and last images for smooth looping
+  const safeClone = imageSet.length > 0 ? imageSet[0] : { image_url: "/images/events/hero.jpg", title: "" }
+
   return (
-    <div className="relative w-full h-dvh overflow-hidden">
+    <div className="w-full h-screen max-h-dvh overflow-hidden relative">
       {/* Image container with sliding effect */}
-      <div className="absolute inset-0 w-full h-full overflow-hidden">
-        <div
-          className={`flex w-full h-full ${isTransitioning ? "transition-transform duration-500 ease-in-out" : ""}`}
-          style={{
-            transform: `translateX(-${(currentIndex % totalSlides) * 100}%)`,
-          }}
-          onTransitionEnd={handleTransitionEnd}
-        >
-          {/* Duplicate the events and append the first image for seamless looping */}
-          {[...events, events[0]].map((event, index) => (
-            <div key={index} className="w-full h-full flex-shrink-0">
-              <div
-                className="w-full h-full bg-cover bg-no-repeat bg-center"
-                style={{
-                  backgroundImage: `url('${event.image_url || "/images/events/hero.jpg"}')`,
-                }}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+      <div
+        className={`flex w-full h-full ${isTransitioning ? "transition-transform duration-500 ease-in-out" : ""
+          }`}
+        style={{
+          transform: `translateX(-${(currentIndex % (totalSlides + 1)) * 100
+            }%)`,
+        }}
+        onTransitionEnd={handleTransitionEnd}
+      >
+        <AnimatePresence>
+          {/* Duplicate the imageSet and append the first image for seamless looping */}
+          {[...imageSet, safeClone].map((image, index) => {
+            return (
+              <div key={index} className="w-full h-full flex-shrink-0 relative">
+                {/* Background image with enhanced styling */}
+                <div
+                  className="w-full h-full bg-cover bg-no-repeat bg-center transition-transform duration-700 ease-out"
+                  style={{
+                    backgroundImage: `url('${image.image_url || "/images/events/hero.jpg"}')`,
+                    
+                  }}
+                ></div>
 
-      {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-black/20" />
+                {/* Enhanced gradient overlay */}
+                <div className="absolute inset-0 bg-black/20 z-10" />
 
-      {/* Event Title */}
-      <div className="relative z-10 w-full h-full flex flex-col justify-center items-center px-4">
-        <div className="w-full max-w-4xl text-center group">
-          <h1 className="text-palette-5 font-bold text-sm sm:text-base lg:text-lg leading-tight mb-8 drop-shadow-custom">
-            {events[currentIndex].title}
-          </h1>
-        </div>
+                {/* Quote Box (Event Description) */}
+                <div className="absolute h-full max-h-[90dvh] inset-0 flex flex-col justify-end items-center z-[100]">
+                  <motion.div
+                    className="relative p-8 md:p-10 w-full max-w-screen-md bg-gradient-to-t from-palette-2/30 via-palette-2/30 to-transparent backdrop-blur-sm border border-white/20 rounded-lg shadow-lg"
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={index === activeIndex ? { opacity: 1, y: 0, scale: 1 } : {}}
+                    exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+
+                  >
+                    {/* Large quote mark */}
+                    <div className="absolute top-2 left-4 text-white/40 text-6xl font-serif">"</div>
+
+                    {/* Event Title as Quote */}
+                    <div className="relative text-center">
+                      <p className="text-white text-lg md:text-xl italic font-light tracking-wide leading-relaxed">
+                        {image.title}
+                      </p>
+
+                      {/* Decorative underline */}
+                      <div className="w-24 h-0.5 bg-white/60 mt-6 mb-2 mx-auto"></div>
+
+                      {/* Subtitle */}
+                      <p className="text-white/80 text-sm font-medium">Event History</p>
+                    </div>
+
+                    {/* Closing quote mark */}
+                    <div className="absolute bottom-2 right-4 text-white/40 text-6xl font-serif">"</div>
+                  </motion.div>
+                </div>
+              </div>
+            )
+          })}
+        </AnimatePresence>
       </div>
     </div>
-  );
-};
+  )
+}

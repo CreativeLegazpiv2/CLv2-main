@@ -79,7 +79,7 @@ export function CalendarEvent() {
     const currentPhTime = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }))
 
     return (
-      <div className="w-full events mt-1">
+      <div className="w-full events mt-1 ">
         {eventsForDay.map((event, index) => {
           const { bgColor, textColor } = dateColorMap.get(event.date) || { bgColor: "bg-gray-500", textColor: "text-gray-500" }
           
@@ -161,7 +161,7 @@ export function CalendarEvent() {
   }
 
   return (
-    <div className="w-full max-w-[90%] mx-auto md:p-6 bg-shade-2 my-[10dvh] border border-black lg:block hidden">
+    <div className="w-full max-w-[90%] mx-auto md:p-6 bg-shade-2 border border-black lg:block hidden">
       <h1 className="text-5xl font-semibold pl-4 title pb-8">Events Calendar</h1>
       <div className="w-full flex flex-col p-4 rounded-lg">
         <div className="w-full flex flex-row justify-between items-center pb-12">
