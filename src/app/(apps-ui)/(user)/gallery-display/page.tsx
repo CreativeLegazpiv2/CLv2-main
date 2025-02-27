@@ -16,11 +16,12 @@ export default function GalleryVisitorPage() {
         <main className="w-full h-fit text-primary-2 overflow-x-hidden bg-palette-5">
             <div className="pt-[10dvh] flex flex-col w-full max-w-full">
                 {/* <CollectionsCarousel /> */}
+                
+                {/* <CreativeDirectory /> */}
+               
+                <GalleryTitle />
                 {/* <FieldCollection /> */}
                 {/* <CreativeDirectory /> */}
-                {/* <FeaturedCollections /> */}
-                <GalleryTitle />
-                <CreativeDirectory />
                 <FeaturedCollections />
 
             </div>

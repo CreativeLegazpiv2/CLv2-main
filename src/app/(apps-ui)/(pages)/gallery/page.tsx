@@ -20,7 +20,7 @@ export default function GalleryVisitorPage() {
               */}
 
                 <GalleryTitle />
-                <CreativeDirectory />
+                {/* <CreativeDirectory /> */}
                 <FeaturedCollections />
 
 

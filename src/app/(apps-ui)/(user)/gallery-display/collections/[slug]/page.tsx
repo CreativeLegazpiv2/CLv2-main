@@ -96,7 +96,7 @@ export default function CollectionPage() {
             artist: latestCollection[0].artist,
             year: Number(latestCollection[0].year),
             childid: latestCollection[0].childid,
-            link: latestCollection[0].link || "❌ No Link Found",
+            link: latestCollection[0].link,
           };
           setCollectionData({ images: [latestImage] });
         }
@@ -121,7 +121,7 @@ export default function CollectionPage() {
             artist: item.artist,
             year: Number(item.year),
             childid: item.childid,
-            link: item.link || "❌ No Link Found",
+            link: item.link,
           }));
           setCollectionDisplay({ images2 });
         }

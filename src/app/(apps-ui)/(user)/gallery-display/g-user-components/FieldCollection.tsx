@@ -119,7 +119,7 @@ export const FieldCollection = () => {
       </button>
 
       {/* Indicators */}
-      <div className="absolute bottom-4 flex gap-2">
+      {/* <div className="absolute bottom-4 flex gap-2">
         {imageSet.map((_, index) => (
           <div
             key={index}
@@ -130,7 +130,7 @@ export const FieldCollection = () => {
             }`}
           />
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };
