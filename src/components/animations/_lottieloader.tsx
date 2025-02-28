@@ -2,7 +2,8 @@
 import React from "react";
 import Lottie from "lottie-react";
 import { motion } from "framer-motion";
-import animationData from "../../../public/load.json";
+import animationData from "../../../public/lottie/loading.json";
+import animationData2 from "../../../public/load.json";
 
 // Enhanced Clouds Component
 const Clouds = () => (
@@ -57,16 +58,34 @@ export default function Custom404() {
 
 
       {/* Central Animation */}
-      <div className="relative z-10">
+      <div className="relative z-10 w-full h-full flex items-center justify-center">
+        {/* The outer animation (animationData2) */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
+          className="relative"
         >
+          <Lottie
+            animationData={animationData2}
+            loop
+            style={{ width: "24rem", height: "24rem" }}
+            className="md:w-96 md:h-96"
+          />
+
+          {/* The inner animation (animationData) - absolutely positioned in the center */}
           <Lottie
             animationData={animationData}
             loop
-            className="w-80 h-80 md:w-96 md:h-96"
+            style={{
+              width: "18rem",
+              height: "18rem",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)"
+            }}
+            className="md:w-80 md:h-80"
           />
         </motion.div>
       </div>

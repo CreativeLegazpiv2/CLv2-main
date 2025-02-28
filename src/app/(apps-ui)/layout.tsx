@@ -20,7 +20,7 @@ export default function LoadLayout({
   useEffect(() => {
     // Trigger loading on route change
     setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 3000); // Customize delay
+    const timer = setTimeout(() => setIsLoading(false), 3500); // Customize delay
 
     return () => clearTimeout(timer); // Cleanup on unmount
   }, [pathname]);
